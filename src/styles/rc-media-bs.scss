@@ -1,0 +1,74 @@
+//
+// RedCastor Media Bootstrap
+//------------------------------------------------
+.rc-media {
+
+  .rcm-upload {
+    position: relative;
+    width: 100%;
+    height: 500px;
+
+    .rcm-dropzone {
+      position: absolute;
+      border: 4px dashed #b4b9be;
+      text-align: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .crop-area {
+      position: absolute;
+      background: #E4E4E4;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+
+      button {
+        position: relative;
+        float: right;
+        bottom: 42px;
+      }
+    }
+  }
+
+  .thumbnail-block {
+    display       : inline-block;
+    margin        : 10px;
+    padding       : 1px;
+    border        : 0px solid #ddd;
+    border-radius : 0px;
+    max-height    : 190px;
+    overflow      : hidden;
+    line-height   : 0;
+
+    img, div {
+      height : 112px;
+      width : 112px;
+    }
+
+    .thumbnail {
+      margin-bottom: 0;
+    }
+  }
+
+  .selected div,
+  .selected img {
+    border        : 2px dashed #428BCA;
+    border-radius : 0px;
+  }
+
+  .rcm-search {
+    background-color : #EEEEEE;
+    padding          : 3px 5px;
+  }
+
+  .rcm-gallery {
+    width:100%;
+    height: 500px;
+    margin-top: 14px;
+
+    .scroll-viewport {
+      height: 100%;
+    }
+  }
+}

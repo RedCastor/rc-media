@@ -1,0 +1,41 @@
+{
+  "name": "rc-media",
+  "version": "1.0.0-alpha",
+  "homepage": "https://redcastor.io",
+  "authors": [
+    "Auban le Grelle"
+  ],
+  "description": "",
+  "keywords": [
+    "angular",
+    "redcastor",
+    "angularjs",
+    "directive",
+    "media",
+    "file",
+    "upload"
+  ],
+  "main": [
+    "dist/rc-media.js",
+    "dist/rc-media.css"
+  ],
+  "ignore": [
+    "**/.*",
+    "**/*.txt",
+    ".jscsrc",
+    ".jshintrc",
+    "node_modules",
+    "bower_components"
+  ],
+  "dependencies": {
+    "angular": "~1.6.4",
+    "angular-resource": "~1.6.4"
+  },
+  "devDependencies": {
+    "foundation-sites": "6.3.0",
+    "bootstrap-sass": "^3.3.7"
+  },
+  "resolutions": {
+    "angular": "~1.6.4"
+  }
+}

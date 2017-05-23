@@ -1,0 +1,121 @@
+//
+// RedCastor Media Dialog
+//------------------------------------------------
+//==Dialog Box
+.dialog-media {
+  overflow: hidden;
+  padding: 0 !important;
+  outline: none;
+  border: none;
+  box-shadow: 0 15px 45px rgba(0,0,0,0.2);
+  width: 80%;
+  height: 80vh;
+  top: 10vh;
+}
+
+//==Header
+.dialog-header {
+  position: relative;
+  border-bottom: 1px solid #ccc;
+  overflow: hidden;
+  min-height: 65px;
+
+  .dialog-title {
+    margin: 0;
+    padding: 10px 15px;
+  }
+
+  button {
+    margin: 0;
+    outline: none;
+
+    &.float-right {
+      margin-left: 10px;
+    }
+
+    &.float-left {
+      margin-right: 10px;
+    }
+
+    &.hollow.close {
+      min-height: 65px;
+      border: none;
+      border-left: solid 1px #ccc;
+      font-size: 1.5rem;
+
+      &:hover {
+        border-color: #ccc;
+      }
+    }
+
+    &.hollow.upload {
+      position: relative;
+      border: none;
+      margin-top: 15px;
+      padding-left: 47px;
+
+      &:hover {
+        background-color: #1779ba;
+        color: #fff;
+
+        svg {
+          stroke: #fff;
+          fill: none;
+        }
+      }
+
+      svg {
+        position: absolute;
+        left: 12px;
+        top: 7px;
+        stroke: #1779ba;
+        fill: none;
+      }
+    }
+  }
+}
+
+//==Body
+.dialog-body {
+  border-bottom: 1px solid #ccc;
+  height: calc(80vh - 66px - 72px);
+}
+
+//==Footer
+.dialog-footer {
+  position: relative;
+  overflow: hidden;
+  padding: 15px;
+  min-height: 72px;
+
+  // Properly space out buttons
+  .button {
+    margin: 0;
+    outline: none;
+
+    &.float-right {
+      margin-left: 10px;
+    }
+
+    &.float-left {
+      margin-right: 10px;
+    }
+  }
+}
+
+
+// Mobile
+@media screen and (max-width: 767px) {
+
+  //==Dialog Box
+  .dialog-media {
+    width: 100%;
+    height: 100vh;
+    top: 0;
+  }
+
+  //==Body
+  .dialog-body {
+    height: calc(100vh - 66px - 72px);
+  }
+}

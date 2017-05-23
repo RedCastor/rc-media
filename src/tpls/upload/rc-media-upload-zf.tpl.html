@@ -1,0 +1,81 @@
+<div class="rcm-upload">
+
+  <alert class="message" data-ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
+
+  <div data-ng-show="currentState=='selectFiles'" class="rcm-dropzone"
+       ngf-drop="uploadSelectFiles($files)"
+       data-ng-model="file.source"
+       ngf-drag-over-class="dragover"
+       ngf-multiple="multiple"
+       ngf-pattern="{{pattern}}"
+       ngf-accept="{{accept}}"
+       ngf-min-width="minWidth"
+       ngf-min-height="minHeight"
+  >
+
+    <div class="select-file" >
+      <svg width="150" height="150" version="1.1" id="rcm_upload_svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+           x="0px" y="0px" viewBox="0 0 23 20.5" style="enable-background:new 0 0 23 20.5;" xml:space="preserve"
+      >
+        <g id="rcm_upload_svg_arrow">
+	      <line id="rcm_upload_svg_line" class="st0" x1="11.5" y1="20.5" x2="11.5" y2="7.5"/>
+	      <polyline id="rcm_upload_svg_point" class="st1" points="8.5,10.5 11.5,7.5 14.5,10.5 	"/>
+        </g>
+        <path
+          id="rcm_upload_svg_cloud"
+          class="st1"
+          d="M15.5,15.5h3c2.2,0,4-1.8,4-4c0-2.2-1.8-4-4-4c-0.3-3.9-3.5-7-7.5-7c-4,0-7.3,3.2-7.5,7.1c-1.7,0.4-3,2-3,3.9c0,2.2,1.8,4,4,4h3"
+        />
+      </svg>
+
+      <h3><rcm-translate>TITLE_DRAG_FILE</rcm-translate></h3>
+      <p class="lead"><rcm-translate>SUB_TITLE_DRAG_FILE</rcm-translate></p>
+
+      <button ngf-select="uploadSelectFiles($files)"
+              data-ng-model="file.source"
+              ngf-multiple="multiple"
+              ngf-accept="{{accept}}"
+              ngf-pattern="{{pattern}}"
+              ngf-min-width="minWidth"
+              ngf-min-height="minHeight"
+              type="button"
+              class="button primary large"
+      >
+        <rcm-translate>BTN_BROWSE_FILE</rcm-translate>
+      </button>
+    </div>
+  </div>
+
+  <div class="crop-area" data-ng-if="currentState=='cropImage'">
+    <div>
+      <canvas
+              height="{{cropArea.height}}px"
+              width="{{cropArea.width}}px"
+              min-width="cropArea.minWidth"
+              min-height="cropArea.minHeight"
+              id="canvas"
+              img-cropper
+              img-src="{imageData: (file.source | ngfDataUrl), fileType: file.source.type}"
+              img-dst="file.destDataUrl"
+              crop-width="cropArea.cropWidth"
+              crop-height="cropArea.cropHeight"
+              keep-aspect="cropArea.keepAspect"
+              touch-radius="cropArea.touchRadius"
+              color="{{cropArea.color}}"
+              color-drag="{{cropArea.colorDrag}}"
+              color-bg="{{cropArea.colorBg}}"
+              color-crop-bg="{{cropArea.colorCropBg}}"
+      >
+      </canvas>
+    </div>
+  </div>
+
+  <div data-ng-show="currentState=='progressFiles'" class="preview-file" >
+
+    <div class="loading-overlay">
+      <webicon  class="loading-icon" icon="{{loadIcon}}"></webicon>
+    </div>
+
+    <img class="float-center" width="200" height="200" data-ng-src="{{file.destDataUrl}}" alt="">
+  </div>
+</div>

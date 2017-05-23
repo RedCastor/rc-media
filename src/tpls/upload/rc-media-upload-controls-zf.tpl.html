@@ -1,0 +1,10 @@
+<button class="button secondary hollow float-left" data-ng-show="rcMediaApi.upload.currentState=='selectFiles'" data-ng-click="resetUploadFile(true)"><rcm-translate>BTN_BACK_GALLERY</rcm-translate></button>
+
+<div data-ng-show="rcMediaApi.upload.currentState=='cropImage'">
+    <button class="button primary float-right" data-ng-click="uploadFile()"><rcm-translate>BTN_SAVE</rcm-translate></button>
+    <button class="button hollow secondary float-right" data-ng-click="resetUploadFile()"><rcm-translate>BTN_CANCEL</rcm-translate></button>
+</div>
+
+<div data-ng-show="rcMediaApi.upload.currentState=='progressFiles'">
+    <button class="button secondary float-right" data-ng-click="cancelUploadFile()"><rcm-translate>BTN_CANCEL</rcm-translate></button>
+</div>

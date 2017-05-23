@@ -1,0 +1,86 @@
+<div class="rc-media" rc-media
+     rcm-source-url=""
+     rcm-source-url-key="{{rcDialogApi.data.sourceUrlKey}}"
+     rcm-source-id="{{rcDialogApi.data.sourceId}}"
+     rcm-source-title="{{rcDialogApi.data.sourceTitle}}"
+     data-ng-model="rcDialogApi.data.sources"
+     data-ng-model-preview="rcDialogApi.data.sourcesPreview"
+     rcm-return-model-type="{{rcDialogApi.data.returnModelType}}"
+     rcm-return-model-key="{{rcDialogApi.data.returnModelKey}}"
+     rcm-return-model-push="rcDialogApi.data.returnModelPush"
+     rcm-delete-query="{{rcDialogApi.data.deleteQuery}}"
+     rcm-sources-query="{{rcDialogApi.data.sourcesQuery}}"
+     rcm-sources-offset-key="{{rcDialogApi.data.sourcesOffsetKey}}"
+     rcm-sources-limit-key="{{rcDialogApi.data.sourcesLimitKey}}"
+     rcm-sources-search-key="{{rcDialogApi.data.sourcesSearchKey}}"
+>
+<div class="dialog-header">
+    <div data-ng-show="!selectedView">
+        <h3 class="float-left dialog-title"><rcm-translate>TITLE_GALLERY</rcm-translate></h3>
+        <button class="button secondary hollow float-right close" type="button" data-ng-click="rcDialogApi.closeDialog()" aria-label="Close reveal" >
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <button class="button primary hollow float-right upload" type="button" data-ng-show="!selectedView" data-ng-click="selectedView='fileUpload'" >
+            <svg width="25" height="25" version="1.1" id="rcm_upload_svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                   x="0px" y="0px" viewBox="0 0 23 20.5" style="enable-background:new 0 0 23 20.5;" xml:space="preserve"
+              >
+                <g id="rcm_upload_svg_arrow">
+                  <line id="rcm_upload_svg_line" class="st0" x1="11.5" y1="20.5" x2="11.5" y2="7.5"/>
+                  <polyline id="rcm_upload_svg_point" class="st1" points="8.5,10.5 11.5,7.5 14.5,10.5 	"/>
+                </g>
+                <path
+                  id="rcm_upload_svg_cloud"
+                  class="st1"
+                  d="M15.5,15.5h3c2.2,0,4-1.8,4-4c0-2.2-1.8-4-4-4c-0.3-3.9-3.5-7-7.5-7c-4,0-7.3,3.2-7.5,7.1c-1.7,0.4-3,2-3,3.9c0,2.2,1.8,4,4,4h3"
+                />
+            </svg>
+            <rcm-translate>BTN_UPLOAD_FILE</rcm-translate>
+        </button>
+    </div>
+
+    <div data-ng-show="selectedView=='fileUpload'">
+        <h3 class="float-left dialog-title" ><rcm-translate>TITLE_UPLOAD</rcm-translate></h3>
+        <button class="button secondary hollow float-right close" type="button" data-ng-click="rcDialogApi.closeDialog()" aria-label="Close reveal" >
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+</div>
+<div class="dialog-body">
+
+    <!-- Directive rc-media-upload -->
+    <div data-ng-if="selectedView=='fileUpload'"
+         rcm-upload
+         rcm-template-url="rc-media-upload-zf.tpl.html"
+         rcm-multiple="rcDialogApi.data.upload.multiple"
+         rcm-accept="{{rcDialogApi.data.upload.accept}}"
+         rcm-crop="rcDialogApi.data.upload.crop"
+         rcm-crop-area="rcDialogApi.data.upload.cropArea"
+         rcm-load-icon="{{rcDialogApi.data.upload.loadIcon}}"
+    ></div>
+
+    <div data-ng-show="!selectedView">
+        <!-- Directive rc-media-gallery -->
+        <div rcm-gallery
+             rcm-template-url="rc-media-gallery-zf.tpl.html"
+             rcm-order="{{rcDialogApi.data.gallery.order}}"
+             rcm-multiple="rcDialogApi.data.gallery.multiple"
+             rcm-selected-sources="rcDialogApi.data.gallery.selectedSources"
+             rcm-search-value="{{rcDialogApi.data.gallery.searchValue}}"
+             rcm-load-icon="{{rcDialogApi.data.gallery.loadIcon}}"
+        ></div>
+    </div>
+</div>
+<div class="dialog-footer" data-ng-show="selectedView || rcDialogApi.data.gallery.selectedSources.length">
+    <div data-ng-if="selectedView=='fileUpload'" rcm-upload-controls
+         rcm-template-url="rc-media-upload-controls-zf.tpl.html"
+         data-ng-model="rcDialogApi.data.uploadFile"
+         rcm-save-click="selectedView=false"
+         rcm-cancel-click="selectedView=false"
+    ></div>
+
+    <div data-ng-if="!selectedView" rcm-gallery-controls
+         rcm-template-url="rc-media-gallery-controls-zf.tpl.html"
+         rcm-save-click="rcDialogApi.confirmDialog()"
+    ></div>
+</div>
+</div>

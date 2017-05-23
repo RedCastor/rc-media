@@ -1,0 +1,28 @@
+<div class="rcm-gallery" >
+
+    <alert class="message" data-ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
+
+    <div data-ng-show="loading" class="loading-overlay">
+        <webicon  class="loading-icon" icon="{{loadIcon}}"></webicon>
+    </div>
+
+    <div class="gallery-overlay" scrollbar="{autoUpdate: true}">
+
+        <div data-ng-repeat="source in sources | orderBy:order:true"
+             class="thumbnail-block"
+             data-ng-class="{'selected': source.activeClass}"
+             data-ng-click="selectSource(source)">
+            <div class="thumbnail"
+                 data-ng-style="{'background-image':'url({{rcMediaApi.sourceUrl + source[rcMediaApi.sourceUrlKey]}})', 'background-repeat': 'no-repeat', 'background-position': 'center center', 'background-size': 'contain'}"
+                 tooltip-placement="bottom"
+                 tooltip-html-unsafe="{{rcMediaApi.getSourceTitle(source)}}"
+            ></div>
+        </div>
+
+        <button type="button" class="button secondary float-center load-more" data-ng-show="loadMore" data-ng-click="loadMoreSources()" data-ng-disabled="loading">
+            <i class="fa fa-plus"></i>
+            <rcm-translate>BTN_SHOW_MORE</rcm-translate>
+        </button>
+
+    </div>
+</div>
