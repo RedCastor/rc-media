@@ -146,6 +146,7 @@ $body-height : calc(80vh - 67px - 72px);
     height: $body-height;
 
     .gallery-overlay {
+      overflow-y: auto;
       height: 100%;
 
       .scroll-bar {

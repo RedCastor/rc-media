@@ -1,5 +1,5 @@
 .dialog-media {
-  overflow: hidden;
+  overflow-y: hidden !important;
   padding: 0 !important;
   outline: none;
   border: none;
@@ -12,7 +12,7 @@
   position: relative;
   border-bottom: 1px solid #ccc;
   overflow: hidden;
-  min-height: 65px; }
+  min-height: 4em; }
   .dialog-header .dialog-title {
     margin: 0;
     padding: 10px 15px; }
@@ -23,17 +23,17 @@
       margin-left: 10px; }
     .dialog-header button.float-left {
       margin-right: 10px; }
-    .dialog-header button.hollow.close {
-      min-height: 65px;
+    .dialog-header button.hollow.dialog-close {
+      min-height: 2em;
       border: none;
       border-left: solid 1px #ccc;
       font-size: 1.5rem; }
-      .dialog-header button.hollow.close:hover {
+      .dialog-header button.hollow.dialog-close:hover {
         border-color: #ccc; }
     .dialog-header button.hollow.upload {
       position: relative;
       border: none;
-      margin-top: 15px;
+      margin-top: 1em;
       padding-left: 47px; }
       .dialog-header button.hollow.upload:hover {
         background-color: #1779ba;

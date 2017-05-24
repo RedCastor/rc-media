@@ -105,6 +105,7 @@
   width: 100%;
   height: calc(80vh - 67px - 72px); }
   .rc-media .rcm-gallery .gallery-overlay {
+    overflow-y: auto;
     height: 100%; }
     .rc-media .rcm-gallery .gallery-overlay .scroll-bar {
       width: 5px;
