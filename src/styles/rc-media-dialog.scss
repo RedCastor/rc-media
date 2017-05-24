@@ -77,6 +77,7 @@
 
 //==Body
 .dialog-body {
+  position: relative;
   border-bottom: 1px solid #ccc;
   height: calc(80vh - 66px - 72px);
 }
@@ -85,8 +86,8 @@
 .dialog-footer {
   position: relative;
   overflow: hidden;
-  padding: 15px;
-  min-height: 72px;
+  margin: 15px;
+  min-height: 42px;
 
   // Properly space out buttons
   .button {

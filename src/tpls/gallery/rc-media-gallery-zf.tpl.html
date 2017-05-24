@@ -2,7 +2,7 @@
 
     <alert class="message" data-ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
 
-    <div data-ng-show="loading" class="loading-overlay">
+    <div data-ng-hide="!loading" class="loading-overlay">
         <webicon  class="loading-icon" icon="{{loadIcon}}"></webicon>
     </div>
 

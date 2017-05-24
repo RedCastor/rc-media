@@ -16,6 +16,12 @@
   z-index: 100;
   background-color: #fff;
   opacity: 0.6; }
+  .rc-media .loading-overlay.ng-hide {
+    opacity: 0; }
+  .rc-media .loading-overlay.ng-hide-add, .rc-media .loading-overlay.ng-hide-remove {
+    -webkit-transition: opacity linear 0.5s;
+    -o-transition: opacity linear 0.5s;
+    transition: opacity linear 0.5s; }
   .rc-media .loading-overlay .loading-icon {
     height: 80px;
     width: 80px;
@@ -30,7 +36,45 @@
       stroke: #000; }
 
 .rc-media button {
-  outline: none; }
+  outline: none;
+  opacity: 1;
+  -webkit-transition: opacity 0.4s ease-in;
+  -o-transition: opacity 0.4s ease-in;
+  transition: opacity 0.4s ease-in; }
+
+.rc-media .ng-leave button,
+.rc-media .ng-hide button {
+  opacity: 0;
+  -webkit-transition: opacity 0.4s ease-in;
+  -o-transition: opacity 0.4s ease-in;
+  transition: opacity 0.4s ease-in; }
+
+.rc-media .ng-enter button,
+.rc-media .ng-show button {
+  opacity: 1;
+  -webkit-transition: opacity 0.4s ease-in;
+  -o-transition: opacity 0.4s ease-in;
+  transition: opacity 0.4s ease-in; }
+
+.rc-media .upload-view,
+.rc-media .gallery-view {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 1;
+  -webkit-transition: opacity 0.4s linear;
+  -o-transition: opacity 0.4s linear;
+  transition: opacity 0.4s linear; }
+  .rc-media .upload-view.ng-leave, .rc-media .upload-view.ng-enter, .rc-media .upload-view.ng-show, .rc-media .upload-view.ng-hide,
+  .rc-media .gallery-view.ng-leave,
+  .rc-media .gallery-view.ng-enter,
+  .rc-media .gallery-view.ng-show,
+  .rc-media .gallery-view.ng-hide {
+    opacity: 0;
+    -webkit-transition: opacity 0.2s ease-out;
+    -o-transition: opacity 0.2s ease-out;
+    transition: opacity 0.2s ease-out; }
 
 .rc-media .rcm-upload {
   position: relative;
