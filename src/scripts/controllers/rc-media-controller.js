@@ -170,7 +170,12 @@
             }
 
             var title = find_source[source_title_list[source_title_list.length - 1]];
-            return title.replace('_', ' ');
+
+            if (title) {
+                return title.replace('_', ' ');
+            }
+
+            return '';
         };
 
 

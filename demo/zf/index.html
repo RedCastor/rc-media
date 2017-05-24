@@ -36,8 +36,8 @@
         app.config(['rcMediaProvider', function (rcMediaProvider) {
 
             rcMediaProvider.setRest({
-                url: 'http://wp-and-angular.com',
-                path: '/wp-json/wp/v2/media'
+                url: '../upload',
+                path: '/server.php'
             });
 
             rcMediaProvider.useLocale('fr-FR');
@@ -50,8 +50,9 @@
         app.controller('mediaController', ['$scope', '$log', function ($scope, $log) {
             $scope.media = {
                 sourceId: 'id',
-                sourceUrlKey: 'source_url',
-                sourceTitle: 'title.rendered',
+                sourceUrl: '../upload/files/',
+                sourceUrlKey: 'meta',
+                sourceTitle: 'title',
                 returnModelType: 'string',
                 returnModelKey: 'id',
                 returnModelPush: false,
@@ -59,7 +60,7 @@
                 sourcesLimitKey:  'per_page',
                 sourcesSearchKey: 'search',
                 sourcesQuery: {
-                    per_page : 30
+                    per_page : 10
                 },
                 deleteQuery: {
                     force: true
