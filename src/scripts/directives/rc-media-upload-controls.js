@@ -25,6 +25,7 @@
 
                     return rcMediaApi.uploadFile().then(
                         function (response_success) {
+                            $log.debug(response_success);
                             scope.$parent.$parent.$applyAsync($parse(scope.saveClick));
                         },
                         function (response_error) {

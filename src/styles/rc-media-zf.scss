@@ -36,6 +36,11 @@ $body-height : calc(80vh - 67px - 72px);
       position: absolute;
       top: 50%;
       left: 50%;
+
+      svg {
+        fill: #000;
+        stroke: #000;
+      }
     }
   }
 

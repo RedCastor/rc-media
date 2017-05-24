@@ -243,13 +243,15 @@
                     this.upload.file.destDataUrl = this.upload.file.source.$ngfBlobUrl;
                 }
                 else {
-                    this.upload.file.source.$ngfBlobUrl = Upload.dataUrltoBlob(this.upload.file.destDataUrl, this.upload.file.source.name);
-                }
 
+                    this.upload.file.source = Upload.dataUrltoBlob(this.upload.file.destDataUrl, this.upload.file.source.name);
+                }
 
                 this.upload.uploadFile = Upload.upload({
                     url   : rcMediaService.getRestUrl(),
-                    data: this.upload.file.source
+                    data: {
+                        file: this.upload.file.source
+                    }
                 });
 
                 this.upload.uploadFile.then(
@@ -260,20 +262,20 @@
 
                         rcMediaApi.setUploadState(RCMEDIA_UPLOAD_STATES.SELECT_FILES);
 
-                        rcMediaApi.upload.deferred.resolve(response_success);
-
                         rcMediaApi.upload.result = null;
                         rcMediaApi.upload.loading = false;
+
+                        rcMediaApi.upload.deferred.resolve(response_success);
                     },
                     function (response_error) {
                         $log.debug('error status: ' + response_error);
                         rcMediaApi.resetUploadFile();
                         rcMediaApi.setUploadState(RCMEDIA_UPLOAD_STATES.SELECT_FILES);
 
-                        rcMediaApi.upload.deferred.reject(response_error);
-
                         rcMediaApi.upload.result = response_error.data;
                         rcMediaApi.upload.loading = false;
+
+                        rcMediaApi.upload.deferred.reject(response_error);
                     },
                     function (evt) {
                         $log.debug('Progress status: ' + evt);
@@ -316,7 +318,6 @@
             };
 
             this.setUploadState(RCMEDIA_UPLOAD_STATES.SELECT_FILES);
-            this.upload.result = null;
 
             $scope.onResetUploadFile({$file: this.upload.file});
 
