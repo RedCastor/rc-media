@@ -17,8 +17,21 @@
             },
             link: function (scope, elem, attrs, rcMediaApi) {
 
+                scope.loading = false;
+
                 scope.deleteSources = function () {
-                    rcMediaApi.deleteSources();
+                    scope.loading = true;
+
+                    rcMediaApi.deleteSources().then(
+                        function (response_success) {
+                            scope.loading = false;
+                            rcMediaApi.bindResize();
+                        },
+                        function (response_error) {
+                            scope.loading = false;
+                            rcMediaApi.bindResize();
+                        }
+                    );
 
                     scope.$parent.$parent.$applyAsync($parse(scope.deleteClick));
                 };

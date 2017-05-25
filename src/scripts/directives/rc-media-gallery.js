@@ -73,13 +73,10 @@
                         function (response_success) {
                             scope.loadMore = response_success.length > 0 ? true : false;
 
-                            //Force resize event for angular tiny scrollbar after loading hide
-                            $timeout(function() {
-                                $window.dispatchEvent(new Event("resize"));
-                            }, 50);
+                            rcMediaApi.bindResize();
                         },
                         function (response_error) {
-
+                            rcMediaApi.bindResize();
                         }
                     );
                 };

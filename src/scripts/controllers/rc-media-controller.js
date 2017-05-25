@@ -6,13 +6,14 @@
     module.controller("rcMediaCtrl", [
         '$scope',
         '$q',
+        '$window',
         '$injector',
         '$filter',
         '$log',
         '$timeout',
         'RCMEDIA_UPLOAD_STATES',
         'rcMediaService',
-        function ($scope, $q, $injector, $filter, $log, $timeout, RCMEDIA_UPLOAD_STATES, rcMediaService) {
+        function ($scope, $q, $window, $injector, $filter, $log, $timeout, RCMEDIA_UPLOAD_STATES, rcMediaService) {
 
         var rcMediaApi = this;
 
@@ -262,7 +263,7 @@
                 this.upload.uploadFile.then(
                     function (response_success) {
                         rcMediaApi.resetUploadFile();
-                        rcMediaApi.sources.push(angular.copy(response_success.data));
+                        rcMediaApi.addSource(response_success.data);
                         $scope.onUploadFile({$file: rcMediaApi.upload.file});
 
                         rcMediaApi.setUploadState(RCMEDIA_UPLOAD_STATES.SELECT_FILES);
@@ -410,12 +411,13 @@
         this.deleteSources = function ()  {
             $log.debug('deleteSources');
 
+            var all = [];
+
             angular.forEach(this.sourcesSelected, function (source, key) {
 
-                rcMediaService.delete(source[rcMediaApi.sourceId], rcMediaApi.deleteQuery).then(
+                all.push(rcMediaService.delete(source[rcMediaApi.sourceId], rcMediaApi.deleteQuery).then(
                     function (response_success) {
                         rcMediaApi.removeSource(source);
-
                         $scope.onDeleteSources({$source: source} );
                     },
                     function (response_error) {
@@ -426,8 +428,23 @@
                             $scope.onDeleteSources({$source: source} );
                         }
                     }
-                );
+                ));
             });
+
+            this.gallery.loading = true;
+
+            var defer_all = $q.all(all);
+
+            defer_all.then(
+                function (response_success) {
+                    rcMediaApi.gallery.loading = false;
+                },
+                function (response_error) {
+                    rcMediaApi.gallery.loading = false;
+                }
+            );
+
+            return defer_all;
         };
 
 
@@ -450,6 +467,17 @@
                 rcMediaApi.sourcesSelected.splice(deleted_index, 1);
             }
         };
+
+
+        /**
+         * Add item in sources
+         *
+         * @param source
+         */
+        this.addSource = function ( source ) {
+            rcMediaApi.sources.push(angular.copy(source));
+        };
+
 
         /**
          * Function to instantiate model with the selected values.
@@ -515,7 +543,7 @@
                 function (response_success) {
                     if (response_success.length > 0) {
                         angular.forEach(response_success, function (value) {
-                            rcMediaApi.sources.push(angular.copy(value));
+                            rcMediaApi.addSource(value);
                         }, rcMediaApi);
                     }
                     else {
@@ -569,6 +597,15 @@
             );
 
             return sources_deferred;
+        };
+
+        /**
+         *  Force resize event for angular tiny scrollbar after loading hide
+         */
+        this.bindResize = function() {
+            $timeout(function() {
+                $window.dispatchEvent(new Event("resize"));
+            }, 50);
         };
 
         this.addBindings = function () {
