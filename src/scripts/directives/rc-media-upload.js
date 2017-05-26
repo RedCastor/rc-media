@@ -12,6 +12,7 @@
                 multiple  : '=?rcmMultiple',
                 accept    : '@?rcmAccept',
                 pattern   : '@?rcmPattern',
+                fileName  : '@?rcmFileName',
                 minWidth  : '=?rcmMinWidth',
                 minHeight : '=?rcmMinHeight',
                 fixOrientation: '=?rcmFixOrientation',
@@ -33,6 +34,7 @@
                 scope.multiple = angular.isDefined(scope.multiple) ? scope.multiple : false;
                 scope.accept = angular.isDefined(scope.accept) ? scope.accept : '*/*';
                 scope.pattern = angular.isDefined(scope.pattern) ? scope.pattern : '*/*';
+                scope.fileName = angular.isDefined(scope.fileName) ? scope.fileName : '';
                 scope.minWidth = angular.isDefined(scope.minWidth) ? scope.minWidth : 0;
                 scope.minHeight = angular.isDefined(scope.minHeight) ? scope.minHeight : 0;
                 scope.fixOrientation = angular.isDefined(scope.fixOrientation) ? scope.fixOrientation : false;
@@ -171,14 +173,15 @@
                 // INIT
                 rcMediaApi.uploadElement = angular.element(elem);
                 rcMediaApi.initMediaUpload( {
-                    multiple: scope.multiple,
-                    accept  : scope.accept,
-                    pattern : scope.pattern,
-                    minWidth: scope.minWidth,
+                    multiple : scope.multiple,
+                    accept   : scope.accept,
+                    pattern  : scope.pattern,
+                    fileName : scope.fileName,
+                    minWidth : scope.minWidth,
                     minHeight: scope.minHeight,
-                    crop    : scope.crop,
-                    cropArea: scope.cropArea,
-                    file    : scope.file
+                    crop     : scope.crop,
+                    cropArea : scope.cropArea,
+                    file     : scope.file
                 } );
 
                 scope.rcMediaApi = rcMediaApi;

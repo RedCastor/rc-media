@@ -30,6 +30,7 @@
                 multiple: false,
                 accept: '*/*',
                 pattern: '*/*',
+                fileName: '',
                 minWidth: 0,
                 minHeight: 0,
                 fixOrientation: false,
@@ -291,6 +292,12 @@
                 else {
 
                     this.upload.file.source = Upload.dataUrltoBlob(this.upload.file.destDataUrl, this.upload.file.source.name);
+                }
+
+                //Rename File
+                if (this.upload.fileName.length > 0) {
+                    var ext = this.upload.file.source.$ngfName.slice((this.upload.file.source.$ngfName.lastIndexOf(".") - 1 >>> 0) + 2);
+                    this.upload.file.source.$ngfName = this.upload.fileName + '.' + ext;
                 }
 
                 this.upload.uploadFile = Upload.upload({
