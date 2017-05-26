@@ -35,9 +35,14 @@
 
         app.config(['rcMediaProvider', function (rcMediaProvider) {
 
+            //rcMediaProvider.setRest({
+            //    url: 'https://media.redcastor.io/upload/',
+            //    path: 'server.php'
+            //});
+
             rcMediaProvider.setRest({
-                url: 'https://media.redcastor.io/upload/',
-                path: 'server.php'
+                url: 'http://localhost/projects/Staglabel/wp-dev/woodev/wp-json',
+                path: '/wp/v2/media'
             });
 
             rcMediaProvider.useLocale('fr-FR');
@@ -50,9 +55,9 @@
         app.controller('mediaController', ['$scope', '$log', function ($scope, $log) {
             $scope.media = {
                 sourceId: 'id',
-                sourceUrl: '../upload/files/',
-                sourceUrlKey: 'meta',
-                sourceTitle: 'title',
+                sourceUrl: '',
+                sourceUrlKey: 'source_url',
+                sourceTitle: 'title.rendered',
                 returnModelType: 'string',
                 returnModelKey: 'id',
                 returnModelPush: false,
@@ -68,7 +73,9 @@
                 upload: {
                     crop: true,
                     multiple: false,
-                    accepte: 'image/*',
+                    pattern: 'image/*',
+                    minWidth: 300,
+                    minHeight: 200,
                     cropArea: {
                         color: 'rgba(118, 118, 118, 0.8)',
                         colorDrag: 'rgba(118, 118, 118, 0.8)',
@@ -139,7 +146,7 @@
                 <input type="text" data-ng-model="media.sources" >
             </div>
             <div data-ng-repeat="source in media.sourcesPreview">
-                <div class="small-12 columns">
+                <div class="small-4 medium-2 large-1 columns">
                     <p><img data-ng-src="{{source.source_url}}" alt=""></p>
                 </div>
             </div>

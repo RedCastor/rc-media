@@ -3,14 +3,16 @@
   <alert class="message" data-ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
 
   <div data-ng-show="currentState=='selectFiles'" class="rcm-dropzone"
-       ngf-drop="uploadSelectFiles($files)"
+       ngf-drop
        data-ng-model="file.source"
+       ngf-change="changeFiles($files, $file, $newFiles, $duplicateFiles, $invalidFiles, $event)"
        ngf-drag-over-class="dragover"
        ngf-multiple="multiple"
-       ngf-pattern="{{pattern}}"
        ngf-accept="{{accept}}"
+       ngf-pattern="{{pattern}}"
        ngf-min-width="minWidth"
        ngf-min-height="minHeight"
+       ngf-fix-orientation="fixOrientation"
   >
 
     <div class="select-file" >
@@ -31,8 +33,9 @@
       <h3><rcm-translate>TITLE_DRAG_FILE</rcm-translate></h3>
       <p class="lead"><rcm-translate>SUB_TITLE_DRAG_FILE</rcm-translate></p>
 
-      <button ngf-select="uploadSelectFiles($files)"
+      <button ngf-select
               data-ng-model="file.source"
+              ngf-change="changeFiles($files, $file, $newFiles, $duplicateFiles, $invalidFiles, $event)"
               ngf-multiple="multiple"
               ngf-accept="{{accept}}"
               ngf-pattern="{{pattern}}"
@@ -60,6 +63,7 @@
               crop-width="cropArea.cropWidth"
               crop-height="cropArea.cropHeight"
               keep-aspect="cropArea.keepAspect"
+              enforce-crop-aspect="cropArea.enforceCropAspect"
               touch-radius="cropArea.touchRadius"
               color="{{cropArea.color}}"
               color-drag="{{cropArea.colorDrag}}"

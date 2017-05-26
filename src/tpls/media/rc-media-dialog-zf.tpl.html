@@ -52,7 +52,11 @@
          rcm-upload
          rcm-template-url="rc-media-upload-zf.tpl.html"
          rcm-multiple="rcDialogApi.data.upload.multiple"
-         rcm-accept="{{rcDialogApi.data.upload.accept}}"
+         rcm-accept="'{{rcDialogApi.data.upload.accept}}'"
+         rcm-pattern="'{{rcDialogApi.data.upload.pattern}}'"
+         rcm-min-width="rcDialogApi.data.upload.minWidth"
+         rcm-min-height="rcDialogApi.data.upload.minHeight"
+         rcm-fix-orientation="rcDialogApi.data.upload.fixOrientation"
          rcm-crop="rcDialogApi.data.upload.crop"
          rcm-crop-area="rcDialogApi.data.upload.cropArea"
          rcm-load-icon="{{rcDialogApi.data.upload.loadIcon}}"

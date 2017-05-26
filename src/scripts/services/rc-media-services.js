@@ -36,7 +36,11 @@
                 BTN_BACK_GALLERY    : 'Back to gallery',
                 BTN_UPLOAD_FILE     : 'Upload file',
                 BTN_UPLOAD_FILES    : 'Upload files',
-                BTN_BROWSE_FILE     : 'Browse a file'
+                BTN_BROWSE_FILE     : 'Browse a file',
+                UPLOAD_INVALID_FILE : 'Your file is not valid.',
+                UPLOAD_INVALID_minWidth : 'Minimum width',
+                UPLOAD_INVALID_minHeight: 'Minimum height',
+                UPLOAD_INVALID_pattern  : 'File type error'
             },
             'fr-FR': {
                 TITLE_GALLERY       : 'Gallerie',
@@ -54,7 +58,11 @@
                 BTN_BACK_GALLERY    : 'Revenir à la gallerie',
                 BTN_UPLOAD_FILE     : 'Télécharger le fichier',
                 BTN_UPLOAD_FILES    : 'Télécharger les fichiers',
-                BTN_BROWSE_FILE     : 'Choisir un fichier'
+                BTN_BROWSE_FILE     : 'Choisir un fichier',
+                UPLOAD_INVALID_FILE : 'Votre fichier n\'est pas valide.',
+                UPLOAD_INVALID_minWidth : 'Largeur minimum',
+                UPLOAD_INVALID_minHeight: 'Hauteur minimum',
+                UPLOAD_INVALID_pattern  : 'Type de fichier erroné'
             }
         };
 
@@ -67,7 +75,9 @@
             var rest = this.rest;
             var localizedText;
 
+            //Enable Cors
             $http.defaults.useXDomain = true;
+            $http.defaults.headers.common['Access-Control-Allow-Origin']  = '*';
 
             // Disable IE ajax request caching
             $http.defaults.headers.common['If-Modified-Since']  = '0';

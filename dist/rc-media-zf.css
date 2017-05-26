@@ -6,6 +6,8 @@
   width: 100%;
   border: none;
   z-index: 200; }
+  .rc-media .message span {
+    white-space: pre-line; }
 
 .rc-media .loading-overlay {
   position: absolute;
@@ -149,7 +151,7 @@
   width: 100%;
   height: calc(80vh - 67px - 72px); }
   .rc-media .rcm-gallery .gallery-overlay {
-    overflow-y: auto;
+    overflow-y: visible;
     height: 100%; }
     .rc-media .rcm-gallery .gallery-overlay .scroll-bar {
       width: 5px;

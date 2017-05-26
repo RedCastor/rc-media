@@ -48,9 +48,9 @@
                 };
 
                 scope.onChangeSources = function (newValue, oldValue) {
-
+                    $log.debug('onChangeSources');
                     if (newValue !== oldValue) {
-                        $log.debug('onSearch');
+                        $log.debug('onChangeSources');
                         scope.sources = newValue;
                     }
                 };
@@ -99,8 +99,8 @@
 
                 scope.rcMediaApi = rcMediaApi;
 
-                scope.$watch('rcMediaApi.sources', scope.onChangeSources);
-                scope.$watch('rcMediaApi.sourcesSelected', scope.onChangeSourcesSelected);
+                scope.$watchCollection('rcMediaApi.sources', scope.onChangeSources);
+                scope.$watchCollection('rcMediaApi.sourcesSelected', scope.onChangeSourcesSelected);
                 scope.$watch('rcMediaApi.gallery.loading', scope.onChangeGalleryLoading);
 
             }

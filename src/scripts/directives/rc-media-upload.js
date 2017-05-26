@@ -3,7 +3,7 @@
 
     var module = angular.module('rcMedia');
 
-    module.directive("rcmUpload", [ '$log', function ($log) {
+    module.directive("rcmUpload", [ 'rcMedia', '$log', function (rcMedia, $log) {
         return {
             restrict  : 'EA',
             require: "^rcMedia",
@@ -14,6 +14,7 @@
                 pattern   : '@?rcmPattern',
                 minWidth  : '=?rcmMinWidth',
                 minHeight : '=?rcmMinHeight',
+                fixOrientation: '=?rcmFixOrientation',
                 crop      : '=?rcmCrop',
                 cropArea  : '=?rcmCropArea',
                 loadIcon : '@?rcmLoadIcon'
@@ -30,22 +31,24 @@
 
                 scope.file = angular.isDefined(scope.file) ? scope.file : rcMediaApi.resetUploadFile();
                 scope.multiple = angular.isDefined(scope.multiple) ? scope.multiple : false;
-                scope.accept = angular.isDefined(scope.accept) ? scope.accept : 'image/*';
-                scope.pattern = angular.isDefined(scope.pattern) ? scope.pattern : 'image/*';
-                scope.minWidth = angular.isDefined(scope.minWidth) ? scope.minWidth : 300;
-                scope.minHeight = angular.isDefined(scope.minHeight) ? scope.minHeight : 300;
+                scope.accept = angular.isDefined(scope.accept) ? scope.accept : '*/*';
+                scope.pattern = angular.isDefined(scope.pattern) ? scope.pattern : '*/*';
+                scope.minWidth = angular.isDefined(scope.minWidth) ? scope.minWidth : 0;
+                scope.minHeight = angular.isDefined(scope.minHeight) ? scope.minHeight : 0;
+                scope.fixOrientation = angular.isDefined(scope.fixOrientation) ? scope.fixOrientation : false;
 
                 scope.crop = angular.isDefined(scope.crop) ? scope.crop : true;
 
                 var crop_area_default = {
                     auto: true,
-                    width: 500,
-                    height: 500,
-                    minWidth: 100,
-                    minHeaight: 100,
-                    cropWidth: 2048,
-                    cropHeight: 2048,
+                    width: scope.minWidth,
+                    height: scope.minHeight,
+                    minWidth: scope.minWidth,
+                    minHeight: scope.minHeight,
+                    cropWidth: 0,
+                    cropHeight: 0,
                     keepAspect: true,
+                    enforceCropAspect: false,
                     touchRadius: 30,
                     color: 'rgba(118, 118, 118, 0.8)',
                     colorDrag: 'rgba(118, 118, 118, 0.8)',
@@ -57,18 +60,14 @@
 
                 // FUNCTIONS
                 scope.onChangeUploadLoading = function (newValue, oldValue) {
-
-                    if (newValue === false) {
-                        scope.loadMore = rcMediaApi.gallery.loadMore;
-                    }
-
                     scope.loading = newValue;
                 };
+
                 scope.onChangeUploadResult = function (newValue, oldValue) {
 
                     if (newValue !== oldValue) {
                         if (angular.isObject(rcMediaApi.upload.result) && angular.isDefined(rcMediaApi.upload.result.message)) {
-                            scope.alerts.push({type: 'alert', msg: rcMediaApi.upload.result.message});
+                            scope.addAlert('alert', rcMediaApi.upload.result.message);
                         }
                         else {
                             scope.alerts = [];
@@ -82,39 +81,87 @@
                         scope.file = newValue;
                     }
                 };
+
                 scope.onChangeUploadMultiple = function (newValue, oldValue) {
                     if (newValue !== oldValue) {
                         $log.debug('onChangeUploadMultiple');
                         scope.multiple = newValue;
                     }
                 };
+
                 scope.onChangeUploadCrop = function (newValue, oldValue) {
                     if (newValue !== oldValue) {
                         $log.debug('onChangeUploadCrop');
                         scope.crop = newValue;
                     }
                 };
-                scope.onChangeUploadCrop = function (newValue, oldValue) {
-                    if (newValue !== oldValue) {
-                        $log.debug('onChangeUploadCrop');
-                        scope.cropArea = newValue;
-                    }
-                };
+
                 scope.onChangeUploadProgress = function (newValue, oldValue) {
                     if (newValue !== oldValue) {
                         $log.debug('onChangeUploadProgress');
                         scope.progress = newValue;
                     }
                 };
+
                 scope.onChangeUploadCurrentState = function (newValue, oldValue) {
                     $log.debug('onChangeUploadCurrentState');
 
+                    angular.extend(scope.cropArea, rcMediaApi.upload.cropArea);
                     scope.currentState = newValue;
                 };
 
                 scope.uploadSelectFiles = function ($files) {
                     scope.alerts = [];
                     rcMediaApi.uploadSelectFiles($files);
+                };
+
+                scope.changeFiles = function ($files, $file, $newFiles, $duplicateFiles, $invalidFiles, $event) {
+                    $log.debug($invalidFiles);
+
+
+                    if ($invalidFiles.length > 0) {
+                        var err_text = rcMedia.getLocalizedText('UPLOAD_INVALID_FILE');
+
+                        angular.forEach($invalidFiles, function (file, file_key) {
+                            if (file_key > 0) {
+                                err_text += '\r\n';
+                            }
+                            var i = 0;
+                            angular.forEach(file.$errorMessages, function (value, key) {
+
+                                if (i > 0 ) {
+                                    err_text += ', ';
+                                }
+                                else {
+                                    err_text += ' ';
+                                }
+                                if (value === true) {
+                                    err_text += rcMedia.getLocalizedText('UPLOAD_INVALID_' + key);
+
+                                    switch (key) {
+                                        case 'minHeight':
+                                            err_text += ' ' + rcMediaApi.upload.minHeight + 'px';
+                                            break;
+                                        case 'minWidth':
+                                            err_text += ' ' + rcMediaApi.upload.minWidth + 'px';
+                                            break;
+                                        case 'pattern':
+                                            break;
+                                    }
+                                }
+                                i++;
+                            });
+                        });
+
+                        scope.addAlert('alert', err_text);
+                    }
+                    else {
+                        scope.uploadSelectFiles($files);
+                    }
+                };
+
+                scope.addAlert = function(type, msg) {
+                    scope.alerts.push({type: type, msg: msg});
                 };
 
                 scope.closeAlert = function(index) {
@@ -139,7 +186,6 @@
                 scope.$watch('rcMediaApi.upload.file',      scope.onChangeUploadFile);
                 scope.$watch('rcMediaApi.upload.multiple',  scope.onChangeUploadMultiple);
                 scope.$watch('rcMediaApi.upload.crop',      scope.onChangeUploadCrop);
-                scope.$watch('rcMediaApi.upload.cropArea',  scope.onChangeUploadCropArea);
                 scope.$watch('rcMediaApi.upload.progress',  scope.onChangeUploadProgress);
                 scope.$watch('rcMediaApi.upload.loading',   scope.onChangeUploadLoading);
                 scope.$watch('rcMediaApi.upload.result',    scope.onChangeUploadResult);

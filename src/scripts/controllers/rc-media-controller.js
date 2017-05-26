@@ -28,18 +28,14 @@
             //Set default upload
             this.upload = {
                 multiple: false,
-                accept: 'image/*',
-                pattern: 'image/*',
-                minWidth: '300',
-                minHeight: '300',
+                accept: '*/*',
+                pattern: '*/*',
+                minWidth: 0,
+                minHeight: 0,
+                fixOrientation: false,
                 crop: true,
                 cropArea: {
-                    auto: true,
-                    color: 'rgba(118, 118, 118, 0.8)',
-                    width: 500,
-                    height: 500,
-                    minWidth: 100,
-                    minHeight: 100
+                    auto: true
                 },
                 file: {},
                 loading: false,
@@ -173,7 +169,7 @@
             var title = find_source[source_title_list[source_title_list.length - 1]];
 
             if (title) {
-                return title.replace('_', ' ');
+                return title.split('_').join(' ');
             }
 
             return '';
@@ -203,27 +199,71 @@
          */
         this.uploadSelectFiles = function ($files) {
 
+            //Attention multiple file crop not supported.
+
             if ( $files.length > 0 ) {
                 $log.debug('Upload selectFiles');
+                $log.debug($files);
 
-                if ( this.upload.multiple === false && this.upload.crop === true ) {
+                try {
+                    var Upload = $injector.get('Upload');
 
-                    if ( angular.isDefined(this.uploadElement) &&
-                        angular.isDefined(this.upload.cropArea.auto) &&
-                        this.upload.cropArea.auto === true
-                    ) {
+                    /* Get image file dimensions*/
+                    Upload.imageDimensions($files[0]).then(
+                        function(dimensions){
+                            if ( rcMediaApi.upload.multiple === false && rcMediaApi.upload.crop === true ) {
 
-                        this.upload.cropArea.width = this.uploadElement[0].clientWidth;
-                        this.upload.cropArea.height = this.uploadElement[0].clientHeight;
-                        this.upload.cropArea.minWidth = this.upload.cropArea.width / 10;
-                        this.upload.cropArea.minHeight = this.upload.cropArea.height / 10;
+                                if ( angular.isDefined(rcMediaApi.uploadElement) &&
+                                    angular.isDefined(rcMediaApi.upload.cropArea.auto) &&
+                                    rcMediaApi.upload.cropArea.auto === true
+                                ) {
 
-                    }
+                                    var viewWidth = rcMediaApi.uploadElement[0].clientWidth;
+                                    var viewHeight = rcMediaApi.uploadElement[0].clientHeight;
 
-                    this.setUploadState(RCMEDIA_UPLOAD_STATES.CROP_IMAGE);
+                                    if (!rcMediaApi.upload.cropArea.cropHeight) {
+                                        rcMediaApi.upload.cropArea.cropHeight = rcMediaApi.upload.minHeight;
+                                    }
+
+                                    if (!rcMediaApi.upload.cropArea.cropWidth) {
+                                        rcMediaApi.upload.cropArea.cropWidth = rcMediaApi.upload.minWidth;
+                                    }
+
+                                    rcMediaApi.upload.cropArea.width = viewWidth;
+                                    rcMediaApi.upload.cropArea.height = viewHeight;
+
+
+                                    var ratioH = dimensions.height / viewHeight;
+                                    var ratioW = dimensions.width / viewWidth;
+                                    var ratio;
+
+                                    if (ratioH >= ratioW) {
+                                        ratio = ratioH;
+                                    }
+                                    else {
+                                        ratio = ratioW;
+                                    }
+
+                                    rcMediaApi.upload.cropArea.minWidth = parseInt(rcMediaApi.upload.cropArea.cropWidth / ratio);
+                                    rcMediaApi.upload.cropArea.minHeight = parseInt(rcMediaApi.upload.cropArea.cropHeight / ratio);
+                                }
+
+                                $log.debug('change state to Crop');
+                                rcMediaApi.setUploadState(RCMEDIA_UPLOAD_STATES.CROP_IMAGE);
+                            }
+                            else {
+                                //Crop not enable
+                                rcMediaApi.uploadFile();
+                            }
+                        },
+                        function (error) {
+                            //Is not image file
+                            rcMediaApi.uploadFile();
+                        }
+                    );
                 }
-                else {
-                    this.uploadFile();
+                catch(err) {
+                    $log.error(err);
                 }
             }
         };
@@ -389,13 +429,18 @@
 
             sources_deferred.then(
                 function (response_success) {
-                    rcMediaApi.sources = angular.copy(response_success);
+                    if (response_success.length > 0) {
+                        angular.forEach(response_success, function (value, key) {
+                            rcMediaApi.addSource(value);
+                        });
+                    }
 
                     rcMediaApi.gallery.loadMore = rcMediaApi.sources.length > 0 ? true : false;
                     rcMediaApi.gallery.loading = false;
                     rcMediaApi.gallery.result = null;
                 },
                 function (response_error) {
+                    rcMediaApi.sources = [];
                     rcMediaApi.gallery.loadMore = rcMediaApi.sources.length > 0 ? true : false;
                     rcMediaApi.gallery.loading = false;
                     rcMediaApi.gallery.result = response_error.data;
@@ -475,6 +520,7 @@
          * @param source
          */
         this.addSource = function ( source ) {
+            source.tooltipTitle = rcMediaApi.getSourceTitle(source);
             rcMediaApi.sources.push(angular.copy(source));
         };
 
@@ -542,9 +588,9 @@
             sources_deferred.then(
                 function (response_success) {
                     if (response_success.length > 0) {
-                        angular.forEach(response_success, function (value) {
+                        angular.forEach(response_success, function (value, key) {
                             rcMediaApi.addSource(value);
-                        }, rcMediaApi);
+                        });
                     }
                     else {
                         rcMediaApi.gallery.loadMore = false;
@@ -576,7 +622,10 @@
             sources_deferred.then(
                 function (response_success) {
                     if (response_success.length > 0) {
-                        rcMediaApi.sources = angular.copy(response_success);
+                        rcMediaApi.sources = [];
+                        angular.forEach(response_success, function (value, key) {
+                            rcMediaApi.addSource(value);
+                        });
                     }
                     else {
                         rcMediaApi.sources = [];
@@ -610,7 +659,6 @@
 
         this.addBindings = function () {
             $log.debug('addBindings');
-
         };
 
 

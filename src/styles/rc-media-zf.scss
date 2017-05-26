@@ -15,6 +15,10 @@ $body-height : calc(80vh - 67px - 72px);
     width: 100%;
     border: none;
     z-index: 200;
+
+    span {
+      white-space: pre-line;
+    }
   }
 
   .loading-overlay {
@@ -191,7 +195,7 @@ $body-height : calc(80vh - 67px - 72px);
     height: $body-height;
 
     .gallery-overlay {
-      overflow-y: auto;
+      overflow-y: visible;
       height: 100%;
 
       .scroll-bar {
