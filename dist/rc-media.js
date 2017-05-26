@@ -975,6 +975,18 @@
             this.interfaceText[localeId] = angular.extend(this.interfaceText[localeId], obj);
         };
         this.useLocale = function(localeId) {
+            var local = localeId.split("-");
+            if (local.length === 1) {
+                switch (localeId) {
+                  case "en":
+                    localeId += "-US";
+                    break;
+
+                  default:
+                    localeId += "-" + localeId.toUpperCase();
+                }
+            }
+            console.log(localeId);
             this.locale = localeId;
         };
         this.setRest = function(rest) {

@@ -132,6 +132,19 @@
          * @param localeId a string formatted as languageId-countryId
          */
         this.useLocale = function(localeId) {
+            var local = localeId.split('-');
+
+            if (local.length === 1) {
+                switch (localeId) {
+                    case 'en':
+                        localeId += '-US';
+                        break;
+                    default:
+                        localeId += '-' + localeId.toUpperCase();
+                }
+            }
+
+            console.log(localeId);
             this.locale = localeId;
         };
 
