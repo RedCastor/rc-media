@@ -365,16 +365,16 @@
          * @returns {{srcFile: null, destDataUrl: string}}
          */
         this.resetUploadFile = function () {
-            this.upload.file = {
+            rcMediaApi.upload.file = {
                 source: null,
                 destDataUrl: ''
             };
 
-            this.setUploadState(RCMEDIA_UPLOAD_STATES.SELECT_FILES);
+            rcMediaApi.setUploadState(RCMEDIA_UPLOAD_STATES.SELECT_FILES);
 
-            $scope.onResetUploadFile({$file: this.upload.file});
+            $scope.onResetUploadFile({$file: rcMediaApi.upload.file});
 
-            return this.upload.file;
+            return rcMediaApi.upload.file;
         };
 
         /**

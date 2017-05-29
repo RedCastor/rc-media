@@ -76,8 +76,13 @@
 
   <div data-ng-show="currentState=='progressFiles'" class="preview-file" >
 
-    <div class="loading-overlay">
-      <webicon  class="loading-icon" icon="{{loadIcon}}"></webicon>
+    <div data-ng-show="loading" class="loading-overlay">
+      <div device-detector class="is-not-ie">
+        <webicon class="loading-icon" icon="{{loadIcon}}"></webicon>
+      </div>
+      <div device-detector class="is-ie">
+        <div class='loading-icon ripple-css'><div></div><div></div></div>
+      </div>
     </div>
 
     <img class="float-center" width="200" height="200" data-ng-src="{{file.destDataUrl}}" alt="">

@@ -1,0 +1,15 @@
+<div class="rcm-select">
+    <div class="preview-gallery-overlay">
+        <ul class="rcm-preview-gallery" data-ng-show="media.sourcesPreview.length">
+            <li data-ng-repeat="source in media.sourcesPreview" class="image">
+                <a href="" data-ng-mouseenter="sourcePreviewHover=true" ng-mouseleave="sourcePreviewHover=false" data-ng-click="removeSource($index)" >
+                    <div data-ng-style="{'background-image':'url({{media.sourceUrl + source[media.sourceUrlKey]}})', 'background-repeat': 'no-repeat', 'background-position': 'center center', 'background-size': 'contain'}">
+                        <i class="rcm-remove" data-ng-show="sourcePreviewHover"></i>
+                    </div>
+                </a>
+            </li>
+        </ul>
+        <input id="{{id}}" type="hidden" data-ng-model="media.sources" />
+        <button type="button" class="{{class}}" data-ng-hide="(media.sourcesPreview.length && onetime) || loading" rcd-open="{{theme}}" rcd-data="media" rcd-template-url="rc-media-dialog-zf.tpl.html" rcd-backdrop="true" rcd-click-close="false" rcd-class="dialog-media" data-ng-transclude></button>
+    </div>
+</div>

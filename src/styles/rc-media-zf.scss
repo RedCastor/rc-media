@@ -5,6 +5,9 @@
 // variables
 $body-height : calc(80vh - 67px - 72px);
 
+@import "components/loader";
+@import "rc-media-select";
+
 // Style
 .rc-media {
 
@@ -38,22 +41,6 @@ $body-height : calc(80vh - 67px - 72px);
     &.ng-hide-add,
     &.ng-hide-remove {
       transition: opacity linear 0.5s;
-    }
-
-    .loading-icon {
-      height: 80px;
-      width: 80px;
-      text-align: center;
-      padding: 1em;
-      margin: -40px 0 0 -40px;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-
-      svg {
-        fill: #000;
-        stroke: #000;
-      }
     }
   }
 
@@ -101,6 +88,7 @@ $body-height : calc(80vh - 67px - 72px);
     position: relative;
     width: 100%;
     height: $body-height;
+    display: table;
 
     .rcm-dropzone {
       position: absolute;
@@ -144,6 +132,13 @@ $body-height : calc(80vh - 67px - 72px);
         float: right;
         bottom: 42px;
       }
+    }
+
+    .preview-file {
+      display: table-cell;
+      vertical-align: middle;
+      width: 100%;
+      height: 100%;
     }
   }
 
@@ -227,6 +222,20 @@ $body-height : calc(80vh - 67px - 72px);
     }
   }
 }
+
+// Media Select
+.rcm-remove {
+  &:hover {
+    &::before, &::after {
+      background: $alert-color;
+    }
+  }
+
+  &::before, &::after {
+    background: $alert-color;
+  }
+}
+
 
 // Mobile
 @media screen and (max-width: 767px) {

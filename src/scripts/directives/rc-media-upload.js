@@ -51,12 +51,17 @@
                     cropHeight: 0,
                     keepAspect: true,
                     enforceCropAspect: false,
-                    touchRadius: 30,
+                    touchRadius: 10,
                     color: 'rgba(118, 118, 118, 0.8)',
                     colorDrag: 'rgba(118, 118, 118, 0.8)',
                     colorBg: 'rgba(200, 200, 200, 0.8)',
                     colorCropBg: 'rgba(118, 118, 118, 0.8)'
                 };
+
+
+                function add_alert (type, msg) {
+                    scope.alerts.push({type: type, msg: msg});
+                }
 
                 scope.cropArea = angular.isObject(scope.cropArea) ? angular.extend(crop_area_default, scope.cropArea)  : crop_area_default;
 
@@ -67,9 +72,13 @@
 
                 scope.onChangeUploadResult = function (newValue, oldValue) {
 
+                    $log.debug('onChangeUploadResult');
+                    $log.debug(newValue);
+                    $log.debug(oldValue);
+
                     if (newValue !== oldValue) {
                         if (angular.isObject(rcMediaApi.upload.result) && angular.isDefined(rcMediaApi.upload.result.message)) {
-                            scope.addAlert('alert', rcMediaApi.upload.result.message);
+                            add_alert('alert', rcMediaApi.upload.result.message);
                         }
                         else {
                             scope.alerts = [];
@@ -118,8 +127,6 @@
                 };
 
                 scope.changeFiles = function ($files, $file, $newFiles, $duplicateFiles, $invalidFiles, $event) {
-                    $log.debug($invalidFiles);
-
 
                     if ($invalidFiles.length > 0) {
                         var err_text = rcMedia.getLocalizedText('UPLOAD_INVALID_FILE');
@@ -155,15 +162,12 @@
                             });
                         });
 
-                        scope.addAlert('alert', err_text);
+
+                        add_alert('alert', err_text);
                     }
-                    else {
+                    else if ($files.length > 0) {
                         scope.uploadSelectFiles($files);
                     }
-                };
-
-                scope.addAlert = function(type, msg) {
-                    scope.alerts.push({type: type, msg: msg});
                 };
 
                 scope.closeAlert = function(index) {

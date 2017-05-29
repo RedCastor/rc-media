@@ -2,13 +2,19 @@
 
     <alert class="message" data-ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
 
-    <div data-ng-hide="!loading" class="loading-overlay">
-        <webicon  class="loading-icon" icon="{{loadIcon}}"></webicon>
+    <div data-ng-show="loading" class="loading-overlay">
+        <div device-detector class="is-not-ie">
+            <webicon class="loading-icon" icon="{{loadIcon}}"></webicon>
+        </div>
+        <div device-detector class="is-ie">
+            <div class='loading-icon ripple-css'><div></div><div></div></div>
+        </div>
     </div>
 
     <div class="gallery-overlay" scrollbar="{autoUpdate: true}">
 
-        <div data-ng-repeat="source in sources | orderBy:order:true"
+        <a data-ng-repeat="source in sources | orderBy:order:true"
+             href=""
              class="thumbnail-block"
              data-ng-class="{'selected': source.activeClass}"
              data-ng-click="selectSource(source)">
@@ -17,7 +23,7 @@
                  tooltip-placement="bottom"
                  tooltip-html-unsafe="{{source.tooltipTitle}}"
             ></div>
-        </div>
+        </a>
 
         <button type="button" class="button secondary float-center load-more" data-ng-show="loadMore" data-ng-click="loadMoreSources()" data-ng-disabled="loading">
             <i class="fa fa-plus"></i>

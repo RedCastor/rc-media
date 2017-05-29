@@ -19,6 +19,7 @@
     <script src="../dist/scripts/angular-img-cropper.js"></script>
     <script src="../dist/scripts/ngTinyScrollbar.js"></script>
     <script src="../dist/scripts/webicon.js"></script>
+    <script src="../dist/scripts/ng-device-detector.js"></script>
 
     <script src="../../dist/rc-media.js"></script>
     <script src="../dist/scripts/main.js"></script>
@@ -26,7 +27,7 @@
     <script type="text/javascript">
         'use strict';
 
-        var app = angular.module('app', ['ngFileUpload', 'angular-img-cropper', 'rcMedia', 'rcDialog', 'ngTinyScrollbar', 'mm.foundation', 'ngAnimate', 'angular-json-pretty', 'webicon']);
+        var app = angular.module('app', ['ngFileUpload', 'angular-img-cropper', 'rcMedia', 'rcDialog', 'ngTinyScrollbar', 'mm.foundation', 'ngAnimate', 'angular-json-pretty', 'webicon', 'ng.deviceDetector']);
 
         app.config(function($webiconProvider) {
             $webiconProvider
@@ -41,7 +42,7 @@
             //});
 
             rcMediaProvider.setRest({
-                url: 'http://localhost/projects/Staglabel/wp-dev/woodev/wp-json',
+                url: 'http://localhost/projects/StagLabel/clients/lagriffebyas/wp-json',
                 path: '/wp/v2/media'
             });
 
@@ -83,7 +84,7 @@
                         colorBg: 'rgba(200, 200, 200, 0.8)',
                         colorCropBg: 'rgba(0, 0, 0, 0.6)'
                     },
-                    loadIcon: 'spinner:clock'
+                    loadIcon: 'spinner:ripple'
                 },
                 gallery: {
                     order: 'date',
@@ -97,8 +98,18 @@
                 sourcesPreview: []
             };
 
-            $scope.removeImage = function () {
-                $scope.media.source = {};
+            $scope.mediaSelect = {
+                upload: {
+                    minWidth: 600,
+                    minHeight: 600,
+                    cropArea: {
+                        touchRadius: 10,
+                        color: 'rgba(88, 184, 21, 1)',
+                        colorDrag: 'rgba(88, 184, 21, 1)',
+                        colorBg: '#dddddd',
+                        colorCropBg: 'rgba(0, 0, 0, 0.6)'
+                    }
+                }
             };
 
         }]);
@@ -132,7 +143,11 @@
         </div>
 
         <div class="row">
-            <div class="small-3 small-centered columns" >
+            <header class="small-12 column">
+                <h4>Example simple</h4>
+                <hr>
+            </header>
+            <section class="small-12 medium-6 small-centered medium-centered column" >
                 <button type="button" class="button warning expanded"
                         rcd-data="media"
                         rcd-open="foundation"
@@ -140,17 +155,37 @@
                         rcd-backdrop="true"
                         rcd-class="dialog-media"
                 >Open Media Foundation</button>
-            </div>
+
+                <input type="text" data-ng-model="media.sources" >
+
+                <div class="row small-up-2 medium-up-3 large-up-4">
+                    <div class="column column-block" data-ng-repeat="source in media.sourcesPreview">
+                        <p><img data-ng-src="{{source.source_url}}" alt=""></p>
+                    </div>
+                </div>
+                <br>
+            </section>
+        </div>
+
+        <div class="row">
+            <header class="small-12 column">
+                <h4>Example single select</h4>
+                <hr>
+            </header>
+            <section class="small-12 medium-6 small-centered medium-centered column">
+                <rcm-select rcm-onetime="true" rcm-single="true" rcm-class="button primary expanded" rcm-theme="foundation" rcm-config="{upload: {minWidth: 300, minHeight: 300}}" rcm-init-sources="557" >Select Image</rcm-select>
+                <br>
+            </section>
         </div>
         <div class="row">
-            <div class="small-12 columns">
-                <input type="text" data-ng-model="media.sources" >
-            </div>
-            <div data-ng-repeat="source in media.sourcesPreview">
-                <div class="small-4 medium-2 large-1 columns">
-                    <p><img data-ng-src="{{source.source_url}}" alt=""></p>
-                </div>
-            </div>
+            <header class="small-12 column">
+                <h4>Example multiple select</h4>
+                <hr>
+            </header>
+            <section class="small-6 medium-6 small-centered medium-centered column">
+                <rcm-select rcm-onetime="false" rcm-single="false" rcm-class="button success expanded" rcm-theme="foundation" rcm-media="mediaSelect" rcm-config="{upload: {minWidth: 300, minHeight: 300}}">Add to Gallery</rcm-select>
+                <br>
+            </section>
         </div>
     </div>
 </main>

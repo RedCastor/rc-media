@@ -1,4 +1,4 @@
-<div class="rc-media" rc-media
+<rc-media class="rc-media"
      rcm-source-url="{{rcDialogApi.data.sourceUrl}}"
      rcm-source-url-key="{{rcDialogApi.data.sourceUrlKey}}"
      rcm-source-id="{{rcDialogApi.data.sourceId}}"
@@ -48,8 +48,7 @@
 <div class="dialog-body">
 
     <!-- Directive rc-media-upload -->
-    <div class="upload-view" data-ng-if="selectedView=='fileUpload'"
-         rcm-upload
+    <rcm-upload class="upload-view" data-ng-if="selectedView=='fileUpload'"
          rcm-template-url="rc-media-upload-zf.tpl.html"
          rcm-multiple="rcDialogApi.data.upload.multiple"
          rcm-accept="'{{rcDialogApi.data.upload.accept}}'"
@@ -61,31 +60,31 @@
          rcm-crop="rcDialogApi.data.upload.crop"
          rcm-crop-area="rcDialogApi.data.upload.cropArea"
          rcm-load-icon="{{rcDialogApi.data.upload.loadIcon}}"
-    ></div>
+    ></rcm-upload>
 
     <div class="gallery-view" data-ng-show="!selectedView">
         <!-- Directive rc-media-gallery -->
-        <div rcm-gallery
+        <rcm-gallery
              rcm-template-url="rc-media-gallery-zf.tpl.html"
              rcm-order="{{rcDialogApi.data.gallery.order}}"
              rcm-multiple="rcDialogApi.data.gallery.multiple"
              rcm-selected-sources="rcDialogApi.data.gallery.selectedSources"
              rcm-search-value="{{rcDialogApi.data.gallery.searchValue}}"
              rcm-load-icon="{{rcDialogApi.data.gallery.loadIcon}}"
-        ></div>
+        ></rcm-gallery>
     </div>
 </div>
 <div class="dialog-footer" data-ng-show="selectedView || rcDialogApi.data.gallery.selectedSources.length">
-    <div class="upload-view" data-ng-if="selectedView=='fileUpload'" rcm-upload-controls
+    <rcm-upload-controls class="upload-view" data-ng-if="selectedView=='fileUpload'"
          rcm-template-url="rc-media-upload-controls-zf.tpl.html"
          data-ng-model="rcDialogApi.data.uploadFile"
          rcm-save-click="selectedView=false"
          rcm-cancel-click="selectedView=false"
-    ></div>
+    ></rcm-upload-controls>
 
-    <div class="gallery-view" data-ng-if="!selectedView" rcm-gallery-controls
+    <rcm-gallery-controls class="gallery-view" data-ng-if="!selectedView"
          rcm-template-url="rc-media-gallery-controls-zf.tpl.html"
          rcm-save-click="rcDialogApi.confirmDialog()"
-    ></div>
+    ></rcm-gallery-controls>
 </div>
-</div>
+</rc-media>

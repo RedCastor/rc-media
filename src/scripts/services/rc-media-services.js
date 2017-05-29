@@ -144,7 +144,6 @@
                 }
             }
 
-            console.log(localeId);
             this.locale = localeId;
         };
 
