@@ -126,7 +126,7 @@
 
 ul.rcm-preview-gallery {
   padding-left: 0;
-  margin-left: -5px;
+  margin-left: 0;
   list-style: none; }
   ul.rcm-preview-gallery > li {
     display: inline-block;
