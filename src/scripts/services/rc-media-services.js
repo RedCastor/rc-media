@@ -22,8 +22,10 @@
         this.defaultText = {
             'en-us': {
                 TITLE_GALLERY       : 'Gallery',
+                TITLE_EMPTY_GALLERY : 'Your gallery is empty',
                 TITLE_UPLOAD        : 'Upload file',
                 TITLE_DRAG_FILE     : 'Drag files to upload',
+                SUB_TITLE_EMPTY_GALLERY: 'Upload your first file.',
                 SUB_TITLE_DRAG_FILE : 'or',
                 BTN_CANCEL          : 'Cancel',
                 BTN_SAVE            : 'Save',
@@ -44,8 +46,10 @@
             },
             'fr-FR': {
                 TITLE_GALLERY       : 'Galerie',
+                TITLE_EMPTY_GALLERY : 'La galerie est vide',
                 TITLE_UPLOAD        : 'Télécharger un fichier',
                 TITLE_DRAG_FILE     : 'Glisser le fichier ici',
+                SUB_TITLE_EMPTY_GALLERY: 'Veuillez charger votre premier fichier.',
                 SUB_TITLE_DRAG_FILE : 'ou',
                 BTN_CANCEL          : 'Annuler',
                 BTN_SAVE            : 'Sauver',
@@ -66,8 +70,10 @@
             },
             'nl-NL': {
                 TITLE_GALLERY       : 'Fotogalerij',
+                TITLE_EMPTY_GALLERY : 'Uw galerij is leeg',
                 TITLE_UPLOAD        : 'File uploaden',
                 TITLE_DRAG_FILE     : 'Zet de file hier neer',
+                SUB_TITLE_EMPTY_GALLERY: 'Upload hier uw eerste file.',
                 SUB_TITLE_DRAG_FILE : 'of',
                 BTN_CANCEL          : 'Annuleren',
                 BTN_SAVE            : 'Opslaan',

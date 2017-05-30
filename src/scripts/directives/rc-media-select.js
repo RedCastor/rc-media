@@ -10,6 +10,7 @@
             scope     : {
                 theme   : '@?rcmTheme',
                 name    : '@?rcmName',
+                type    : '@?rcmType',
                 id      : '@?rcmId',
                 class   : '@?rcmClass',
                 onetime : '=?rcmOnetime',

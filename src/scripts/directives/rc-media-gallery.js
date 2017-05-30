@@ -3,7 +3,7 @@
 
     var module = angular.module('rcMedia');
 
-    module.directive("rcmGallery", ['$window', '$timeout', '$log', function ($window, $timeout, $log) {
+    module.directive("rcmGallery", ['$parse', '$compile', '$window', '$timeout', '$log', function ($parse, $compile, $window, $timeout, $log) {
         return {
             restrict  : 'EA',
             require: "^rcMedia",
@@ -13,7 +13,8 @@
                 order   : '@?rcmOrder',
                 multiple: '=?rcmMultiple',
                 search  : '@?rcmSearchValue',
-                loadIcon : '@?rcmLoadIcon'
+                loadIcon : '@?rcmLoadIcon',
+                uploadClick: '@?rcmUploadClick'
             },
             templateUrl: function (elem, attrs) {
                 return attrs.rcmTemplateUrl  || 'rc-media-gallery.tpl.html';

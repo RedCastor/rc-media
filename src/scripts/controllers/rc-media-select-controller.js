@@ -21,6 +21,7 @@
             $scope.theme = angular.isDefined($scope.theme) ? $scope.theme : '';
             $scope.name = angular.isDefined($scope.name) ? $scope.name : 'media_sources';
             $scope.id = angular.isDefined($scope.id) ? $scope.id : $scope.name + '_select';
+            $scope.type = angular.isDefined($scope.type) ? $scope.type : 'text';
             $scope.class = angular.isDefined($scope.class) ? $scope.class : '';
             $scope.onetime = angular.isDefined($scope.onetime) ? $scope.onetime : false;
             $scope.single = angular.isDefined($scope.single) ? $scope.single : false;
@@ -78,13 +79,16 @@
 
 
         $scope.removeSource = function ($index) {
+            
             $scope.media.sourcesPreview.splice($index, 1);
 
             if (angular.isArray($scope.media.sources)) {
                 $scope.media.sources.splice($index, 1);
             }
             else if(angular.isString($scope.media.sources)) {
-                $scope.media.sources = $scope.media.sources.split(',').splice($index, 1).join(',');
+                $scope.media.sources = $scope.media.sources.split(',');
+                $scope.media.sources.splice($index, 1);
+                $scope.media.sources = $scope.media.sources.join(',');
             }
         };
 
@@ -95,7 +99,7 @@
                 sources = sources.join(',');
             }
 
-            if((!angular.isString(sources) && !angular.isNumber(sources)) || sources.length === 0 ) {
+            if((!angular.isString(sources) && !angular.isNumber(sources_str)) || sources.length === 0 ) {
                 return false;
             }
 
@@ -107,6 +111,23 @@
             rcMediaService.get(sources_query).then(
                 function (response_success) {
                     $scope.media.sourcesPreview = response_success;
+                    sources = [];
+
+                    angular.forEach(response_success, function(value, key) {
+                        if (angular.isDefined(value[$scope.media.returnModelKey])) {
+                            sources.push(value[$scope.media.returnModelKey]);
+                        }
+                    });
+
+                    switch ($scope.media.returnModelType) {
+                        case 'string':
+                            $scope.media.sources = sources.toString();
+                            break;
+                        case 'array':
+                            $scope.media.sources = sources;
+                            break;
+                    }
+
                     $scope.loading = false;
                 },
                 function (response_error) {

@@ -139,6 +139,7 @@ $body-height : calc(80vh - 67px - 72px);
       vertical-align: middle;
       width: 100%;
       height: 100%;
+
     }
   }
 
@@ -214,6 +215,43 @@ $body-height : calc(80vh - 67px - 72px);
           height: 100%;
           padding-bottom: 50px;
         }
+      }
+
+      .gallery-empty {
+        width: calc(100% + 18px);
+        height: calc(100% + 50px);
+        position: relative;
+        text-align: center;
+        display: table;
+
+        .center-content {
+
+          &:before {
+            content: '';
+            position: absolute;
+            right: 130px;
+            top: 10px;
+            width: 100px;
+            height: 100px;
+            background-image: url(images/empty-stroke-upload.svg);
+            background-size: contain;
+            background-position: top center;
+            animation-name: opacity;
+            animation-duration: 1s;
+            animation-iteration-count: infinite;
+            animation-direction: alternate;
+            animation-timing-function: ease-in-out;
+          }
+
+          @keyframes opacity {
+            from {opacity: 1;}
+            to {opacity: 0.5;}
+          }
+
+          display: table-cell;
+          vertical-align: middle;
+        }
+
       }
     }
 
