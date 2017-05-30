@@ -25,11 +25,9 @@
                     rcMediaApi.deleteSources().then(
                         function (response_success) {
                             scope.loading = false;
-                            rcMediaApi.bindResize();
                         },
                         function (response_error) {
                             scope.loading = false;
-                            rcMediaApi.bindResize();
                         }
                     );
 

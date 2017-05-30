@@ -33,10 +33,8 @@
                     scope.loading = true;
                     rcMediaApi.deleteSources().then(function(response_success) {
                         scope.loading = false;
-                        rcMediaApi.bindResize();
                     }, function(response_error) {
                         scope.loading = false;
-                        rcMediaApi.bindResize();
                     });
                     scope.$parent.$parent.$applyAsync($parse(scope.deleteClick));
                 };
@@ -115,10 +113,7 @@
                 scope.loadMoreSources = function() {
                     rcMediaApi.loadMoreSources().then(function(response_success) {
                         scope.loadMore = response_success.length > 0 ? true : false;
-                        rcMediaApi.bindResize();
-                    }, function(response_error) {
-                        rcMediaApi.bindResize();
-                    });
+                    }, function(response_error) {});
                 };
                 scope.closeAlert = function(index) {
                     scope.alerts.splice(index, 1);
@@ -485,6 +480,7 @@
     var module = angular.module("rcMedia");
     module.controller("rcMediaCtrl", [ "$scope", "$q", "$window", "$injector", "$filter", "$log", "$timeout", "RCMEDIA_UPLOAD_STATES", "rcMediaService", function($scope, $q, $window, $injector, $filter, $log, $timeout, RCMEDIA_UPLOAD_STATES, rcMediaService) {
         var rcMediaApi = this;
+        var debounce_bind_resize;
         this.rcMediaElement = null;
         this.init = function() {
             $log.debug("rcMedia Init");
@@ -802,10 +798,12 @@
             if (deleted_index !== -1) {
                 rcMediaApi.sourcesSelected.splice(deleted_index, 1);
             }
+            rcMediaApi.bindResize();
         };
         this.addSource = function(source) {
             source.tooltipTitle = rcMediaApi.getSourceTitle(source);
             rcMediaApi.sources.push(angular.copy(source));
+            rcMediaApi.bindResize();
         };
         this.saveSources = function() {
             $log.debug("saveSources");
@@ -898,9 +896,13 @@
             return sources_deferred;
         };
         this.bindResize = function() {
-            $timeout(function() {
+            if (debounce_bind_resize) {
+                $timeout.cancel(debounce_bind_resize);
+            }
+            debounce_bind_resize = $timeout(function() {
+                $log.debug("Bind Resize for scroll");
                 $window.dispatchEvent(new Event("resize"));
-            }, 50);
+            }, 300);
         };
         this.addBindings = function() {
             $log.debug("addBindings");
@@ -919,7 +921,7 @@
             $scope.loading = false;
             $scope.theme = angular.isDefined($scope.theme) ? $scope.theme : "";
             $scope.name = angular.isDefined($scope.name) ? $scope.name : "media_sources";
-            $scope.id = angular.isDefined($scope.id) ? $scope.id : "media_select";
+            $scope.id = angular.isDefined($scope.id) ? $scope.id : $scope.name + "_select";
             $scope.class = angular.isDefined($scope.class) ? $scope.class : "";
             $scope.onetime = angular.isDefined($scope.onetime) ? $scope.onetime : false;
             $scope.single = angular.isDefined($scope.single) ? $scope.single : false;

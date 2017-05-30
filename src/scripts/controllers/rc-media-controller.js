@@ -16,6 +16,7 @@
         function ($scope, $q, $window, $injector, $filter, $log, $timeout, RCMEDIA_UPLOAD_STATES, rcMediaService) {
 
         var rcMediaApi = this;
+        var debounce_bind_resize;
 
         this.rcMediaElement = null;
 
@@ -518,6 +519,8 @@
             if (deleted_index !== -1) {
                 rcMediaApi.sourcesSelected.splice(deleted_index, 1);
             }
+
+            rcMediaApi.bindResize();
         };
 
 
@@ -529,6 +532,8 @@
         this.addSource = function ( source ) {
             source.tooltipTitle = rcMediaApi.getSourceTitle(source);
             rcMediaApi.sources.push(angular.copy(source));
+
+            rcMediaApi.bindResize();
         };
 
 
@@ -659,9 +664,15 @@
          *  Force resize event for angular tiny scrollbar after loading hide
          */
         this.bindResize = function() {
-            $timeout(function() {
+
+            if (debounce_bind_resize) {
+                $timeout.cancel(debounce_bind_resize);
+            }
+
+            debounce_bind_resize = $timeout(function() {
+                $log.debug('Bind Resize for scroll');
                 $window.dispatchEvent(new Event("resize"));
-            }, 50);
+            }, 300);
         };
 
         this.addBindings = function () {

@@ -20,7 +20,7 @@
 
             $scope.theme = angular.isDefined($scope.theme) ? $scope.theme : '';
             $scope.name = angular.isDefined($scope.name) ? $scope.name : 'media_sources';
-            $scope.id = angular.isDefined($scope.id) ? $scope.id : 'media_select';
+            $scope.id = angular.isDefined($scope.id) ? $scope.id : $scope.name + '_select';
             $scope.class = angular.isDefined($scope.class) ? $scope.class : '';
             $scope.onetime = angular.isDefined($scope.onetime) ? $scope.onetime : false;
             $scope.single = angular.isDefined($scope.single) ? $scope.single : false;

@@ -72,11 +72,9 @@
                     rcMediaApi.loadMoreSources().then(
                         function (response_success) {
                             scope.loadMore = response_success.length > 0 ? true : false;
-
-                            rcMediaApi.bindResize();
                         },
                         function (response_error) {
-                            rcMediaApi.bindResize();
+
                         }
                     );
                 };
