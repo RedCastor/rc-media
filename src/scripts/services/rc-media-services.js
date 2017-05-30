@@ -22,7 +22,7 @@
         this.defaultText = {
             'en-us': {
                 TITLE_GALLERY       : 'Gallery',
-                TITLE_UPLOAD        : 'Upload files',
+                TITLE_UPLOAD        : 'Upload file',
                 TITLE_DRAG_FILE     : 'Drag files to upload',
                 SUB_TITLE_DRAG_FILE : 'or',
                 BTN_CANCEL          : 'Cancel',
@@ -43,7 +43,7 @@
                 UPLOAD_INVALID_pattern  : 'File type error'
             },
             'fr-FR': {
-                TITLE_GALLERY       : 'Gallerie',
+                TITLE_GALLERY       : 'Galerie',
                 TITLE_UPLOAD        : 'Télécharger un fichier',
                 TITLE_DRAG_FILE     : 'Glisser le fichier ici',
                 SUB_TITLE_DRAG_FILE : 'ou',
@@ -51,11 +51,11 @@
                 BTN_SAVE            : 'Sauver',
                 BTN_DELETE_FILE     : 'Supprimer le fichier',
                 BTN_DELETE_FILES    : 'Supprimer les fichiers',
-                BTN_DESELECT_ALL    : 'Déselectioner tous',
-                BTN_SELECT_FILE     : 'Selectioner le fichier',
-                BTN_SELECT_FILES    : 'Selectioner les fichiers',
+                BTN_DESELECT_ALL    : 'Désélectionner tous',
+                BTN_SELECT_FILE     : 'Sélectionner le fichier',
+                BTN_SELECT_FILES    : 'Sélectionner les fichiers',
                 BTN_SHOW_MORE       : 'Voir plus',
-                BTN_BACK_GALLERY    : 'Revenir à la gallerie',
+                BTN_BACK_GALLERY    : 'Revenir à la galerie',
                 BTN_UPLOAD_FILE     : 'Télécharger le fichier',
                 BTN_UPLOAD_FILES    : 'Télécharger les fichiers',
                 BTN_BROWSE_FILE     : 'Choisir un fichier',
@@ -63,6 +63,28 @@
                 UPLOAD_INVALID_minWidth : 'Largeur minimum',
                 UPLOAD_INVALID_minHeight: 'Hauteur minimum',
                 UPLOAD_INVALID_pattern  : 'Type de fichier erroné'
+            },
+            'nl-NL': {
+                TITLE_GALLERY       : 'Fotogalerij',
+                TITLE_UPLOAD        : 'File uploaden',
+                TITLE_DRAG_FILE     : 'Zet de file hier neer',
+                SUB_TITLE_DRAG_FILE : 'of',
+                BTN_CANCEL          : 'Annuleren',
+                BTN_SAVE            : 'Opslaan',
+                BTN_DELETE_FILE     : 'File deleten',
+                BTN_DELETE_FILES    : 'Files deleten',
+                BTN_DESELECT_ALL    : 'Alles deselecteren',
+                BTN_SELECT_FILE     : 'File selecteren',
+                BTN_SELECT_FILES    : 'Files selecteren',
+                BTN_SHOW_MORE       : 'Meer zien',
+                BTN_BACK_GALLERY    : 'Terug naar de fotogalerij',
+                BTN_UPLOAD_FILE     : 'File uploaden',
+                BTN_UPLOAD_FILES    : 'Files uploaden',
+                BTN_BROWSE_FILE     : 'File kiezen',
+                UPLOAD_INVALID_FILE : 'Uw file is niet geldig.',
+                UPLOAD_INVALID_minWidth : 'Minimum breedte',
+                UPLOAD_INVALID_minHeight: 'Minimum hoogte',
+                UPLOAD_INVALID_pattern  : 'Verkeerde file type'
             }
         };
 

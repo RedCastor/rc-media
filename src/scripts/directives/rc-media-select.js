@@ -9,6 +9,7 @@
             transclude: true,
             scope     : {
                 theme   : '@?rcmTheme',
+                name    : '@?rcmName',
                 id      : '@?rcmId',
                 class   : '@?rcmClass',
                 onetime : '=?rcmOnetime',

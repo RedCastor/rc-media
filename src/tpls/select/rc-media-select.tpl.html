@@ -9,7 +9,7 @@
                 </a>
             </li>
         </ul>
-        <input id="{{id}}" type="hidden" data-ng-model="media.sources" />
+        <input name="{{name}}" id="{{id}}" type="hidden" data-ng-model="media.sources" />
         <button type="button" class="{{class}}" data-ng-hide="(media.sourcesPreview.length && onetime) || loading" rcd-open="{{theme}}" rcd-data="media" rcd-template-url="rc-media-dialog-zf.tpl.html" rcd-backdrop="true" rcd-click-close="false" rcd-class="dialog-media" data-ng-transclude></button>
     </div>
 </div>
