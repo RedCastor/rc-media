@@ -99,7 +99,7 @@
                 sources = sources.join(',');
             }
 
-            if((!angular.isString(sources) && !angular.isNumber(sources_str)) || sources.length === 0 ) {
+            if((!angular.isString(sources) && !angular.isNumber(sources)) || sources.length === 0 ) {
                 return false;
             }
 
