@@ -32,6 +32,7 @@
                 accept: '*/*',
                 pattern: '*/*',
                 fileName: '',
+                fields: {},
                 minWidth: 0,
                 minHeight: 0,
                 fixOrientation: false,
@@ -58,6 +59,8 @@
             this.returnModelType  = angular.isDefined($scope.returnModelType) ? $scope.returnModelType : 'string';
             this.returnModelKey   = angular.isDefined($scope.returnModelKey) ? $scope.returnModelKey : null;
             this.returnModelPush   = angular.isDefined($scope.returnModelPush) ? $scope.returnModelPush : false;
+
+            this.altKey = angular.isDefined($scope.altKey) ? $scope.altKey : 'alt_text';
 
             this.accept         = angular.isDefined($scope.accept) ? $scope.accept : 'image/*';
 
@@ -246,8 +249,8 @@
                                         ratio = ratioW;
                                     }
 
-                                    rcMediaApi.upload.cropArea.minWidth = parseInt(rcMediaApi.upload.cropArea.cropWidth / ratio);
-                                    rcMediaApi.upload.cropArea.minHeight = parseInt(rcMediaApi.upload.cropArea.cropHeight / ratio);
+                                    rcMediaApi.upload.cropArea.minWidth = rcMediaApi.upload.cropArea.cropWidth / ratio;
+                                    rcMediaApi.upload.cropArea.minHeight = rcMediaApi.upload.cropArea.cropHeight / ratio;
                                 }
 
                                 $log.debug('change state to Crop');
@@ -302,10 +305,9 @@
                 }
 
                 this.upload.uploadFile = Upload.upload({
-                    url   : rcMediaService.getRestUrl(),
-                    data: {
-                        file: this.upload.file.source
-                    }
+                    url  : rcMediaService.getRestUrl(),
+                    file: this.upload.file.source,
+                    fields: this.upload.fields
                 });
 
                 this.upload.uploadFile.then(

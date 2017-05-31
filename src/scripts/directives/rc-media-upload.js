@@ -13,6 +13,7 @@
                 accept    : '@?rcmAccept',
                 pattern   : '@?rcmPattern',
                 fileName  : '@?rcmFileName',
+                fields    : '@rcmFields',
                 minWidth  : '=?rcmMinWidth',
                 minHeight : '=?rcmMinHeight',
                 fixOrientation: '=?rcmFixOrientation',
@@ -35,6 +36,7 @@
                 scope.accept = angular.isDefined(scope.accept) ? scope.accept : '*/*';
                 scope.pattern = angular.isDefined(scope.pattern) ? scope.pattern : '*/*';
                 scope.fileName = angular.isDefined(scope.fileName) ? scope.fileName : '';
+                scope.fields = angular.isDefined(scope.fields) ? scope.$eval(scope.fields) : {};
                 scope.minWidth = angular.isDefined(scope.minWidth) ? scope.minWidth : 0;
                 scope.minHeight = angular.isDefined(scope.minHeight) ? scope.minHeight : 0;
                 scope.fixOrientation = angular.isDefined(scope.fixOrientation) ? scope.fixOrientation : false;
@@ -50,6 +52,7 @@
                     cropWidth: 0,
                     cropHeight: 0,
                     keepAspect: true,
+                    sourceAspect: false,
                     enforceCropAspect: false,
                     touchRadius: 10,
                     color: 'rgba(118, 118, 118, 0.8)',
@@ -181,6 +184,7 @@
                     accept   : scope.accept,
                     pattern  : scope.pattern,
                     fileName : scope.fileName,
+                    fields   : scope.fields,
                     minWidth : scope.minWidth,
                     minHeight: scope.minHeight,
                     crop     : scope.crop,

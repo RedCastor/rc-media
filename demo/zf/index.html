@@ -100,10 +100,15 @@
 
             $scope.mediaSelect = {
                 upload: {
+                    fields: {
+                        alt_text:'Salut 2 Alt Text'
+                    },
                     minWidth: 600,
                     minHeight: 600,
                     cropArea: {
                         touchRadius: 10,
+                        keepAspect: true,
+                        sourceAspect: true,
                         color: 'rgba(88, 184, 21, 1)',
                         colorDrag: 'rgba(88, 184, 21, 1)',
                         colorBg: '#dddddd',
