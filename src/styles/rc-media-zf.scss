@@ -1,14 +1,9 @@
 //
 // RedCastor Media Foundation
 //------------------------------------------------
+@import "settings";
 
-// variables
-$body-height : calc(80vh - 67px - 72px);
-
-@import "components/loader";
-@import "rc-media-select";
-
-// Style
+//==Style
 .rc-media {
 
   .message {
@@ -87,7 +82,7 @@ $body-height : calc(80vh - 67px - 72px);
   .rcm-upload {
     position: relative;
     width: 100%;
-    height: $body-height;
+    height: $rc-media-zf-body-height;
     display: table;
 
     .rcm-dropzone {
@@ -188,7 +183,7 @@ $body-height : calc(80vh - 67px - 72px);
   .rcm-gallery {
     position: relative;
     width:100%;
-    height: $body-height;
+    height: $rc-media-zf-body-height;
 
     .gallery-overlay {
       overflow-y: visible;
@@ -233,7 +228,7 @@ $body-height : calc(80vh - 67px - 72px);
             top: 10px;
             width: 100px;
             height: 100px;
-            background-image: url(images/empty-stroke-upload.svg);
+            background-image: rc-media-image-url("empty-stroke-upload.svg");
             background-size: contain;
             background-position: top center;
             animation-name: opacity;

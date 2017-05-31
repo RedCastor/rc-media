@@ -340,7 +340,7 @@ ul.rcm-preview-gallery {
           top: 10px;
           width: 100px;
           height: 100px;
-          background-image: url(images/empty-stroke-upload.svg);
+          background-image: url("./images/empty-stroke-upload.svg");
           background-size: contain;
           background-position: top center;
           -webkit-animation-name: opacity;

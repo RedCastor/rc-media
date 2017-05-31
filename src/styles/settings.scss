@@ -1,0 +1,10 @@
+//
+// RedCastor Media Variables
+//------------------------------------------------
+@import "util/mixins";
+@import "components/loader";
+@import "rc-media-select";
+
+//==Variables
+$rc-media-path: "./images/" !default;
+$rc-media-zf-body-height : calc(80vh - 67px - 72px) !default;

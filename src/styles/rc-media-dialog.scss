@@ -1,6 +1,9 @@
 //
 // RedCastor Media Dialog
 //------------------------------------------------
+
+@import "settings";
+
 //==Dialog Box
 .dialog-media {
   overflow-y: hidden !important;
@@ -49,10 +52,8 @@
     }
 
     &.hollow.upload {
-      position: relative;
       border: none;
-      margin-top: 1em;
-      padding-left: 47px;
+      margin: 0.5em 0 0.5em 0;
 
       &:hover {
         background-color: #1779ba;
@@ -65,9 +66,9 @@
       }
 
       svg {
-        position: absolute;
-        left: 12px;
-        top: 7px;
+        position: relative;
+        display: inline-block;
+        vertical-align: middle;
         stroke: #1779ba;
         fill: none;
       }

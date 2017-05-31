@@ -1,0 +1,12 @@
+//
+// RedCastor Media Mixins
+//------------------------------------------------
+
+@function rc-media-image-url($url) {
+  @if function-exists(image-url) {
+    @return image-url($url);
+  }
+  @else {
+    @return url($rc-media-path + $url);
+  }
+}
