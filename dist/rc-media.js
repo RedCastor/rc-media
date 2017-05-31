@@ -309,7 +309,7 @@
                     cropWidth: 0,
                     cropHeight: 0,
                     keepAspect: true,
-                    sourceAspect: false,
+                    keepAspectRatio: false,
                     enforceCropAspect: false,
                     touchRadius: 10,
                     color: "rgba(118, 118, 118, 0.8)",
