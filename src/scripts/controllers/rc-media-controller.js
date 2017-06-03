@@ -225,19 +225,6 @@
 
                                     var viewWidth = rcMediaApi.uploadElement[0].clientWidth;
                                     var viewHeight = rcMediaApi.uploadElement[0].clientHeight;
-
-                                    if (!rcMediaApi.upload.cropArea.cropHeight) {
-                                        rcMediaApi.upload.cropArea.cropHeight = rcMediaApi.upload.minHeight;
-                                    }
-
-                                    if (!rcMediaApi.upload.cropArea.cropWidth) {
-                                        rcMediaApi.upload.cropArea.cropWidth = rcMediaApi.upload.minWidth;
-                                    }
-
-                                    rcMediaApi.upload.cropArea.width = viewWidth;
-                                    rcMediaApi.upload.cropArea.height = viewHeight;
-
-
                                     var ratioH = dimensions.height / viewHeight;
                                     var ratioW = dimensions.width / viewWidth;
                                     var ratio;
@@ -249,8 +236,32 @@
                                         ratio = ratioW;
                                     }
 
-                                    rcMediaApi.upload.cropArea.minWidth = rcMediaApi.upload.cropArea.cropWidth / ratio;
-                                    rcMediaApi.upload.cropArea.minHeight = rcMediaApi.upload.cropArea.cropHeight / ratio;
+                                    if (!rcMediaApi.upload.cropArea.cropHeight) {
+                                        if (rcMediaApi.upload.cropArea.keepAspect === true) {
+                                            rcMediaApi.upload.cropArea.cropHeight = rcMediaApi.upload.minHeight;
+                                        }
+                                        else {
+                                            rcMediaApi.upload.cropArea.cropHeight = dimensions.height;
+                                        }
+                                    }
+
+                                    if (!rcMediaApi.upload.cropArea.cropWidth) {
+                                        if (rcMediaApi.upload.cropArea.keepAspect === true) {
+                                            rcMediaApi.upload.cropArea.cropWidth = rcMediaApi.upload.minWidth;
+                                        }
+                                        else {
+                                            rcMediaApi.upload.cropArea.cropWidth = dimensions.width;
+                                        }
+                                    }
+
+                                    rcMediaApi.upload.cropArea.width = viewWidth;
+                                    rcMediaApi.upload.cropArea.height = viewHeight;
+
+
+
+
+                                    rcMediaApi.upload.cropArea.minWidth = rcMediaApi.upload.minWidth / ratio;
+                                    rcMediaApi.upload.cropArea.minHeight = rcMediaApi.upload.minHeight / ratio;
                                 }
 
                                 $log.debug('change state to Crop');
@@ -313,7 +324,14 @@
                 this.upload.uploadFile.then(
                     function (response_success) {
                         rcMediaApi.resetUploadFile();
-                        rcMediaApi.addSource(response_success.data);
+
+                        //Add source to sources;
+                        var added_source = rcMediaApi.addSource(response_success.data);
+
+                        //@ addes source
+                        rcMediaApi.selectSource(added_source);
+
+
                         $scope.onUploadFile({$file: rcMediaApi.upload.file});
 
                         rcMediaApi.setUploadState(RCMEDIA_UPLOAD_STATES.SELECT_FILES);
@@ -389,16 +407,16 @@
             $log.debug('selectSource');
 
             if ( rcMediaApi.sourcesSelected.indexOf(source) === -1 ) {
-                if (this.gallery.multiple) {
+                if (rcMediaApi.gallery.multiple) {
                     source.activeClass = true;
-                    this.sourcesSelected.push(source);
+                    rcMediaApi.sourcesSelected.push(source);
                 } else {
                     angular.forEach(rcMediaApi.sources, function (value, key) {
                         rcMediaApi.sources[key].activeClass = false;
                     });
                     source.activeClass = true;
-                    this.sourcesSelected = [];
-                    this.sourcesSelected.push(source);
+                    rcMediaApi.sourcesSelected = [];
+                    rcMediaApi.sourcesSelected.push(source);
                 }
                 $scope.onSelectSource({$source: source});
             } else {
@@ -413,6 +431,8 @@
                     }
                 });
             }
+
+            $log.error(rcMediaApi.sourcesSelected);
         };
 
 
@@ -533,9 +553,14 @@
          */
         this.addSource = function ( source ) {
             source.tooltipTitle = rcMediaApi.getSourceTitle(source);
-            rcMediaApi.sources.push(angular.copy(source));
+
+            var new_source = angular.copy(source);
+
+            rcMediaApi.sources.push(new_source);
 
             rcMediaApi.bindResize();
+
+            return new_source;
         };
 
 

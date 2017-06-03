@@ -130,6 +130,7 @@ ul.rcm-preview-gallery {
   list-style: none; }
   ul.rcm-preview-gallery > li {
     display: inline-block;
+    vertical-align: middle;
     padding-right: 5px;
     padding-left: 5px; }
 

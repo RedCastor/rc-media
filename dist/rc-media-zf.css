@@ -131,6 +131,7 @@ ul.rcm-preview-gallery {
   list-style: none; }
   ul.rcm-preview-gallery > li {
     display: inline-block;
+    vertical-align: middle;
     padding-right: 5px;
     padding-left: 5px; }
 
@@ -293,10 +294,12 @@ ul.rcm-preview-gallery {
 .rc-media .selected div,
 .rc-media .selected img {
   border-radius: 0px;
-  box-shadow: 0 0 0 3px #428BCA; }
+  -webkit-box-shadow: 0 0 0 3px #428BCA;
+          box-shadow: 0 0 0 3px #428BCA; }
 
 .rc-media .selected .tooltip {
-  box-shadow: none; }
+  -webkit-box-shadow: none;
+          box-shadow: none; }
 
 .rc-media .rcm-search {
   background-color: #EEEEEE;

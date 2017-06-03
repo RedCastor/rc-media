@@ -611,14 +611,6 @@
                             if (angular.isDefined(rcMediaApi.uploadElement) && angular.isDefined(rcMediaApi.upload.cropArea.auto) && rcMediaApi.upload.cropArea.auto === true) {
                                 var viewWidth = rcMediaApi.uploadElement[0].clientWidth;
                                 var viewHeight = rcMediaApi.uploadElement[0].clientHeight;
-                                if (!rcMediaApi.upload.cropArea.cropHeight) {
-                                    rcMediaApi.upload.cropArea.cropHeight = rcMediaApi.upload.minHeight;
-                                }
-                                if (!rcMediaApi.upload.cropArea.cropWidth) {
-                                    rcMediaApi.upload.cropArea.cropWidth = rcMediaApi.upload.minWidth;
-                                }
-                                rcMediaApi.upload.cropArea.width = viewWidth;
-                                rcMediaApi.upload.cropArea.height = viewHeight;
                                 var ratioH = dimensions.height / viewHeight;
                                 var ratioW = dimensions.width / viewWidth;
                                 var ratio;
@@ -627,8 +619,24 @@
                                 } else {
                                     ratio = ratioW;
                                 }
-                                rcMediaApi.upload.cropArea.minWidth = rcMediaApi.upload.cropArea.cropWidth / ratio;
-                                rcMediaApi.upload.cropArea.minHeight = rcMediaApi.upload.cropArea.cropHeight / ratio;
+                                if (!rcMediaApi.upload.cropArea.cropHeight) {
+                                    if (rcMediaApi.upload.cropArea.keepAspect === true) {
+                                        rcMediaApi.upload.cropArea.cropHeight = rcMediaApi.upload.minHeight;
+                                    } else {
+                                        rcMediaApi.upload.cropArea.cropHeight = dimensions.height;
+                                    }
+                                }
+                                if (!rcMediaApi.upload.cropArea.cropWidth) {
+                                    if (rcMediaApi.upload.cropArea.keepAspect === true) {
+                                        rcMediaApi.upload.cropArea.cropWidth = rcMediaApi.upload.minWidth;
+                                    } else {
+                                        rcMediaApi.upload.cropArea.cropWidth = dimensions.width;
+                                    }
+                                }
+                                rcMediaApi.upload.cropArea.width = viewWidth;
+                                rcMediaApi.upload.cropArea.height = viewHeight;
+                                rcMediaApi.upload.cropArea.minWidth = rcMediaApi.upload.minWidth / ratio;
+                                rcMediaApi.upload.cropArea.minHeight = rcMediaApi.upload.minHeight / ratio;
                             }
                             $log.debug("change state to Crop");
                             rcMediaApi.setUploadState(RCMEDIA_UPLOAD_STATES.CROP_IMAGE);
@@ -667,7 +675,8 @@
                 });
                 this.upload.uploadFile.then(function(response_success) {
                     rcMediaApi.resetUploadFile();
-                    rcMediaApi.addSource(response_success.data);
+                    var added_source = rcMediaApi.addSource(response_success.data);
+                    rcMediaApi.selectSource(added_source);
                     $scope.onUploadFile({
                         $file: rcMediaApi.upload.file
                     });
@@ -712,16 +721,16 @@
         this.selectSource = function(source) {
             $log.debug("selectSource");
             if (rcMediaApi.sourcesSelected.indexOf(source) === -1) {
-                if (this.gallery.multiple) {
+                if (rcMediaApi.gallery.multiple) {
                     source.activeClass = true;
-                    this.sourcesSelected.push(source);
+                    rcMediaApi.sourcesSelected.push(source);
                 } else {
                     angular.forEach(rcMediaApi.sources, function(value, key) {
                         rcMediaApi.sources[key].activeClass = false;
                     });
                     source.activeClass = true;
-                    this.sourcesSelected = [];
-                    this.sourcesSelected.push(source);
+                    rcMediaApi.sourcesSelected = [];
+                    rcMediaApi.sourcesSelected.push(source);
                 }
                 $scope.onSelectSource({
                     $source: source
@@ -737,6 +746,7 @@
                     }
                 });
             }
+            $log.error(rcMediaApi.sourcesSelected);
         };
         this.deselectSources = function() {
             angular.forEach(rcMediaApi.sources, function(value, key) {
@@ -809,8 +819,10 @@
         };
         this.addSource = function(source) {
             source.tooltipTitle = rcMediaApi.getSourceTitle(source);
-            rcMediaApi.sources.push(angular.copy(source));
+            var new_source = angular.copy(source);
+            rcMediaApi.sources.push(new_source);
             rcMediaApi.bindResize();
+            return new_source;
         };
         this.saveSources = function() {
             $log.debug("saveSources");
