@@ -3,7 +3,7 @@
 
     var module = angular.module('rcMedia');
 
-    module.directive("rcmUpload", [ 'rcMedia', '$log', function (rcMedia, $log) {
+    module.directive("rcmUpload", [ 'rcMedia', '$log', '$parse', function (rcMedia, $log, $parse) {
         return {
             restrict  : 'EA',
             require: "^rcMedia",
@@ -19,7 +19,8 @@
                 fixOrientation: '=?rcmFixOrientation',
                 crop      : '=?rcmCrop',
                 cropArea  : '=?rcmCropArea',
-                loadIcon : '@?rcmLoadIcon'
+                loadIcon  : '@?rcmLoadIcon',
+                change    : '@?rcmChange'
             },
             templateUrl: function (elem, attrs) {
                 return attrs.rcmTemplateUrl || 'rc-media-upload.tpl.html';
@@ -126,7 +127,23 @@
 
                 scope.uploadSelectFiles = function ($files) {
                     scope.alerts = [];
-                    rcMediaApi.uploadSelectFiles($files);
+
+                    var upload = rcMediaApi.uploadSelectFiles($files);
+
+                    if (angular.isObject(upload) && angular.isFunction(upload.then)) {
+                        upload.then(
+                            function (response_success) {
+                                scope.$parent.$parent.$applyAsync($parse(scope.change));
+                            },
+                            function (response_error) {
+                                $log.debug('Upload error');
+                                $log.debug(response_error);
+                            },
+                            function (evt) {
+                                $log.debug(evt);
+                            }
+                        );
+                    }
                 };
 
                 scope.changeFiles = function ($files, $file, $newFiles, $duplicateFiles, $invalidFiles, $event) {

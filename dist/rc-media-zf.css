@@ -294,12 +294,10 @@ ul.rcm-preview-gallery {
 .rc-media .selected div,
 .rc-media .selected img {
   border-radius: 0px;
-  -webkit-box-shadow: 0 0 0 3px #428BCA;
-          box-shadow: 0 0 0 3px #428BCA; }
+  box-shadow: 0 0 0 3px #428BCA; }
 
 .rc-media .selected .tooltip {
-  -webkit-box-shadow: none;
-          box-shadow: none; }
+  box-shadow: none; }
 
 .rc-media .rcm-search {
   background-color: #EEEEEE;

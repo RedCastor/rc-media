@@ -166,8 +166,7 @@ ul.rcm-preview-gallery {
   padding: 0 !important;
   outline: none;
   border: none;
-  -webkit-box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2);
-          box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2);
   width: 80%;
   height: 80vh;
   top: 10vh; }

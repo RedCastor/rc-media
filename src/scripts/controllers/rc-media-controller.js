@@ -210,78 +210,82 @@
                 $log.debug('Upload selectFiles');
                 $log.debug($files);
 
-                try {
-                    var Upload = $injector.get('Upload');
+                if ( rcMediaApi.upload.multiple === false && rcMediaApi.upload.crop === true ) {
+                    $log.debug('Upload Crop');
+                    try {
+                        var Upload = $injector.get('Upload');
 
-                    /* Get image file dimensions*/
-                    Upload.imageDimensions($files[0]).then(
-                        function(dimensions){
-                            if ( rcMediaApi.upload.multiple === false && rcMediaApi.upload.crop === true ) {
+                        /* Get image file dimensions*/
+                        Upload.imageDimensions($files[0]).then(
+                            function(dimensions){
 
-                                if ( angular.isDefined(rcMediaApi.uploadElement) &&
-                                    angular.isDefined(rcMediaApi.upload.cropArea.auto) &&
-                                    rcMediaApi.upload.cropArea.auto === true
-                                ) {
+                                    if ( angular.isDefined(rcMediaApi.uploadElement) &&
+                                        angular.isDefined(rcMediaApi.upload.cropArea.auto) &&
+                                        rcMediaApi.upload.cropArea.auto === true
+                                    ) {
 
-                                    var viewWidth = rcMediaApi.uploadElement[0].clientWidth;
-                                    var viewHeight = rcMediaApi.uploadElement[0].clientHeight;
-                                    var ratioH = dimensions.height / viewHeight;
-                                    var ratioW = dimensions.width / viewWidth;
-                                    var ratio;
+                                        var viewWidth = rcMediaApi.uploadElement[0].clientWidth;
+                                        var viewHeight = rcMediaApi.uploadElement[0].clientHeight;
+                                        var ratioH = dimensions.height / viewHeight;
+                                        var ratioW = dimensions.width / viewWidth;
+                                        var ratio;
 
-                                    if (ratioH >= ratioW) {
-                                        ratio = ratioH;
-                                    }
-                                    else {
-                                        ratio = ratioW;
-                                    }
-
-                                    if (!rcMediaApi.upload.cropArea.cropHeight) {
-                                        if (rcMediaApi.upload.cropArea.keepAspect === true) {
-                                            rcMediaApi.upload.cropArea.cropHeight = rcMediaApi.upload.minHeight;
+                                        if (ratioH >= ratioW) {
+                                            ratio = ratioH;
                                         }
                                         else {
-                                            rcMediaApi.upload.cropArea.cropHeight = dimensions.height;
+                                            ratio = ratioW;
                                         }
+
+                                        if (!rcMediaApi.upload.cropArea.cropHeight) {
+                                            if (rcMediaApi.upload.cropArea.keepAspect === true) {
+                                                rcMediaApi.upload.cropArea.cropHeight = rcMediaApi.upload.minHeight;
+                                            }
+                                            else {
+                                                rcMediaApi.upload.cropArea.cropHeight = dimensions.height;
+                                            }
+                                        }
+
+                                        if (!rcMediaApi.upload.cropArea.cropWidth) {
+                                            if (rcMediaApi.upload.cropArea.keepAspect === true) {
+                                                rcMediaApi.upload.cropArea.cropWidth = rcMediaApi.upload.minWidth;
+                                            }
+                                            else {
+                                                rcMediaApi.upload.cropArea.cropWidth = dimensions.width;
+                                            }
+                                        }
+
+                                        rcMediaApi.upload.cropArea.width = viewWidth;
+                                        rcMediaApi.upload.cropArea.height = viewHeight;
+
+
+
+
+                                        rcMediaApi.upload.cropArea.minWidth = rcMediaApi.upload.minWidth / ratio;
+                                        rcMediaApi.upload.cropArea.minHeight = rcMediaApi.upload.minHeight / ratio;
                                     }
 
-                                    if (!rcMediaApi.upload.cropArea.cropWidth) {
-                                        if (rcMediaApi.upload.cropArea.keepAspect === true) {
-                                            rcMediaApi.upload.cropArea.cropWidth = rcMediaApi.upload.minWidth;
-                                        }
-                                        else {
-                                            rcMediaApi.upload.cropArea.cropWidth = dimensions.width;
-                                        }
-                                    }
-
-                                    rcMediaApi.upload.cropArea.width = viewWidth;
-                                    rcMediaApi.upload.cropArea.height = viewHeight;
-
-
-
-
-                                    rcMediaApi.upload.cropArea.minWidth = rcMediaApi.upload.minWidth / ratio;
-                                    rcMediaApi.upload.cropArea.minHeight = rcMediaApi.upload.minHeight / ratio;
-                                }
-
-                                $log.debug('change state to Crop');
-                                rcMediaApi.setUploadState(RCMEDIA_UPLOAD_STATES.CROP_IMAGE);
+                                    $log.debug('change state to Crop');
+                                    rcMediaApi.setUploadState(RCMEDIA_UPLOAD_STATES.CROP_IMAGE);
+                            },
+                            function (error) {
+                                $log.debug('Upload Dimension Error');
+                                $log.debug(error);
                             }
-                            else {
-                                //Crop not enable
-                                rcMediaApi.uploadFile();
-                            }
-                        },
-                        function (error) {
-                            //Is not image file
-                            rcMediaApi.uploadFile();
-                        }
-                    );
+                        );
+                    }
+                    catch(err) {
+                        $log.error(err);
+                    }
                 }
-                catch(err) {
-                    $log.error(err);
+                else {
+                    //Crop not enable
+                    $log.debug('Upload no crop');
+                    return rcMediaApi.uploadFile();
                 }
             }
+            
+            return false;
         };
 
         /**
@@ -323,6 +327,7 @@
 
                 this.upload.uploadFile.then(
                     function (response_success) {
+                        $log.debug('Upload Success');
                         rcMediaApi.resetUploadFile();
 
                         //Add source to sources;
@@ -352,7 +357,8 @@
                         rcMediaApi.upload.deferred.reject(response_error);
                     },
                     function (evt) {
-                        $log.debug('Progress status: ' + evt);
+                        $log.debug('Progress status');
+                        $log.debug(evt);
 
                         var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
                         rcMediaApi.upload.progress = progressPercentage;
@@ -368,7 +374,6 @@
 
                 rcMediaApi.upload.deferred.reject();
             }
-
 
             return this.upload.deferred.promise;
         };
@@ -431,8 +436,6 @@
                     }
                 });
             }
-
-            $log.error(rcMediaApi.sourcesSelected);
         };
 
 

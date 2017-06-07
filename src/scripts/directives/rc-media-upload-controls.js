@@ -25,10 +25,12 @@
 
                     return rcMediaApi.uploadFile().then(
                         function (response_success) {
+                            $log.debug('Upload success');
                             $log.debug(response_success);
                             scope.$parent.$parent.$applyAsync($parse(scope.saveClick));
                         },
                         function (response_error) {
+                            $log.debug('Upload error');
                             $log.debug(response_error);
                         },
                         function (evt) {
