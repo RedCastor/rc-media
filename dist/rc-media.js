@@ -678,13 +678,23 @@
                 var Upload = $injector.get("Upload");
                 if (angular.isUndefined(this.upload.file.destDataUrl) || !this.upload.file.destDataUrl) {
                     this.upload.file.destDataUrl = this.upload.file.source.$ngfBlobUrl;
+                    Upload.rename(this.upload.file.source, this.upload.file.source.name);
                 } else {
                     this.upload.file.source = Upload.dataUrltoBlob(this.upload.file.destDataUrl, this.upload.file.source.name);
                 }
+                $log.debug(this.upload.file.source);
                 if (this.upload.fileName.length > 0) {
-                    var ext = this.upload.file.source.$ngfName.slice((this.upload.file.source.$ngfName.lastIndexOf(".") - 1 >>> 0) + 2);
-                    this.upload.file.source.$ngfName = this.upload.fileName + "." + ext;
+                    var ext = "";
+                    if (angular.isDefined(this.upload.file.source.$ngfName)) {
+                        ext = this.upload.file.source.$ngfName.slice((this.upload.file.source.$ngfName.lastIndexOf(".") - 1 >>> 0) + 2);
+                        this.upload.file.source.$ngfName = this.upload.fileName + "." + ext;
+                    }
+                    if (angular.isDefined(this.upload.file.source.ngfName)) {
+                        ext = this.upload.file.source.ngfName.slice((this.upload.file.source.ngfName.lastIndexOf(".") - 1 >>> 0) + 2);
+                        this.upload.file.source.ngfName = this.upload.fileName + "." + ext;
+                    }
                 }
+                $log.debug(this.upload.file.source);
                 this.upload.uploadFile = Upload.upload({
                     url: rcMediaService.getRestUrl(),
                     file: this.upload.file.source,
