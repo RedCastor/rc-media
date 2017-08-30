@@ -10,7 +10,7 @@
             require   : ['?ngModel'],
             scope     : {
                 model        : '=ngModel',
-                modelPreview : '=ngModelPreview',
+                modelSources : '=ngModelSources',
                 sourceUrl    : '@rcmSourceUrl',
                 returnModelType : '@rcmReturnModelType',
                 returnModelKey  : '@rcmReturnModelKey',

@@ -16,8 +16,8 @@
                 onetime : '=?rcmOnetime',
                 single  : '=?rcmSingle',
                 media   : '=?rcmMedia',
-                config  : '@?rcmConfig',
-                initSources : '=?rcmInitSources'
+                config : '&?rcmConfig',
+                initSources : '&?rcmInitSources'
             },
             templateUrl: function (elem, attrs) {
                 return attrs.rcmTemplateUrl  || 'rc-media-select.tpl.html';

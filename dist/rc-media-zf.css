@@ -135,6 +135,7 @@ ul.rcm-preview-gallery {
     padding-right: 5px;
     padding-left: 5px; }
 
+.rcm-placeholder,
 .rcm-remove {
   position: relative;
   display: inline-block;
@@ -142,25 +143,29 @@ ul.rcm-preview-gallery {
   height: 100%;
   overflow: hidden;
   background-color: rgba(0, 0, 0, 0.6); }
-  .rcm-remove:hover::before, .rcm-remove:hover::after {
-    background: red; }
-  .rcm-remove::before, .rcm-remove::after {
-    content: '';
-    position: absolute;
-    height: 4px;
-    width: 50%;
-    top: 50%;
-    left: 25%;
-    margin-top: -2px;
-    background: red; }
-  .rcm-remove::before {
-    -webkit-transform: rotate(45deg);
-         -o-transform: rotate(45deg);
-            transform: rotate(45deg); }
-  .rcm-remove::after {
-    -webkit-transform: rotate(-45deg);
-         -o-transform: rotate(-45deg);
-            transform: rotate(-45deg); }
+
+.rcm-remove::before, .rcm-remove::after {
+  content: '';
+  position: absolute;
+  height: 4px;
+  width: 50%;
+  top: 50%;
+  left: 25%;
+  margin-top: -2px;
+  background: red; }
+
+.rcm-remove:hover::before, .rcm-remove:hover::after {
+  background: red; }
+
+.rcm-remove::before {
+  -webkit-transform: rotate(45deg);
+       -o-transform: rotate(45deg);
+          transform: rotate(45deg); }
+
+.rcm-remove::after {
+  -webkit-transform: rotate(-45deg);
+       -o-transform: rotate(-45deg);
+          transform: rotate(-45deg); }
 
 .rc-media .message {
   position: absolute;

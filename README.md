@@ -1,6 +1,7 @@
-# rc-media
+# rc-media Angular
 
-Todo
+rc-media provide directives to media upload inspired by Wordpress media style.
+
 
 **[Demo][]**
 

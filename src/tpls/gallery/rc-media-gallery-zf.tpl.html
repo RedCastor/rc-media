@@ -20,7 +20,7 @@
                data-ng-class="{'selected': source.activeClass}"
                data-ng-click="selectSource(source)">
                 <div class="thumbnail"
-                     data-ng-style="{'background-image':'url({{rcMediaApi.sourceUrl + source[rcMediaApi.sourceUrlKey]}})', 'background-repeat': 'no-repeat', 'background-position': 'center center', 'background-size': 'contain'}"
+                     data-ng-style="{'background-image':'url(\'{{rcMediaApi.sourceUrl + source[rcMediaApi.sourceUrlKey]}}\')', 'background-repeat': 'no-repeat', 'background-position': 'center center', 'background-size': 'contain'}"
                      tooltip-placement="bottom"
                      tooltip-html-unsafe="{{source.tooltipTitle}}"
                 ></div>

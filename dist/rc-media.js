@@ -184,8 +184,8 @@
                 onetime: "=?rcmOnetime",
                 single: "=?rcmSingle",
                 media: "=?rcmMedia",
-                config: "@?rcmConfig",
-                initSources: "=?rcmInitSources"
+                config: "&?rcmConfig",
+                initSources: "&?rcmInitSources"
             },
             templateUrl: function(elem, attrs) {
                 return attrs.rcmTemplateUrl || "rc-media-select.tpl.html";
@@ -460,7 +460,7 @@
             require: [ "?ngModel" ],
             scope: {
                 model: "=ngModel",
-                modelPreview: "=ngModelPreview",
+                modelSources: "=ngModelSources",
                 sourceUrl: "@rcmSourceUrl",
                 returnModelType: "@rcmReturnModelType",
                 returnModelKey: "@rcmReturnModelKey",
@@ -497,7 +497,7 @@
 (function(angular) {
     "use strict";
     var module = angular.module("rcMedia");
-    module.controller("rcMediaCtrl", [ "$scope", "$q", "$window", "$injector", "$filter", "$log", "$timeout", "RCMEDIA_UPLOAD_STATES", "rcMediaService", function($scope, $q, $window, $injector, $filter, $log, $timeout, RCMEDIA_UPLOAD_STATES, rcMediaService) {
+    module.controller("rcMediaCtrl", [ "$scope", "$q", "$window", "$injector", "$filter", "$log", "$timeout", "RCMEDIA_UPLOAD_STATES", "rcMedia", "rcMediaService", function($scope, $q, $window, $injector, $filter, $log, $timeout, RCMEDIA_UPLOAD_STATES, rcMedia, rcMediaService) {
         var rcMediaApi = this;
         var debounce_bind_resize;
         this.rcMediaElement = null;
@@ -530,7 +530,7 @@
             this.sourceUrlKey = angular.isDefined($scope.sourceUrlKey) ? $scope.sourceUrlKey : "source_url";
             this.sourceTitle = angular.isDefined($scope.sourceTitle) ? $scope.sourceTitle : "title.rendered";
             this.returnModelType = angular.isDefined($scope.returnModelType) ? $scope.returnModelType : "string";
-            this.returnModelKey = angular.isDefined($scope.returnModelKey) ? $scope.returnModelKey : null;
+            this.returnModelKey = angular.isDefined($scope.returnModelKey) ? $scope.returnModelKey : this.sourceId;
             this.returnModelPush = angular.isDefined($scope.returnModelPush) ? $scope.returnModelPush : false;
             this.altKey = angular.isDefined($scope.altKey) ? $scope.altKey : "alt_text";
             this.accept = angular.isDefined($scope.accept) ? $scope.accept : "image/*";
@@ -554,6 +554,9 @@
             $scope.onMediaReady({
                 $rcMediaApi: this
             });
+        };
+        this.timeStamp = function() {
+            return parseInt(new Date().getTime() / 1e3);
         };
         this.initMediaGallery = function(gallery, search) {
             $log.debug("initMediaGallery");
@@ -703,15 +706,24 @@
                 this.upload.uploadFile.then(function(response_success) {
                     $log.debug("Upload Success");
                     rcMediaApi.resetUploadFile();
-                    var added_source = rcMediaApi.addSource(response_success.data);
-                    rcMediaApi.selectSource(added_source);
-                    $scope.onUploadFile({
-                        $file: rcMediaApi.upload.file
-                    });
-                    rcMediaApi.setUploadState(RCMEDIA_UPLOAD_STATES.SELECT_FILES);
-                    rcMediaApi.upload.result = null;
+                    var result;
+                    if (angular.isString(response_success.data)) {
+                        rcMediaApi.upload.result = {
+                            message: rcMedia.getLocalizedText("UPLOAD_INVALID_FILE")
+                        };
+                        result = rcMediaApi.upload.deferred.reject(response_success);
+                    } else {
+                        var added_source = rcMediaApi.addSource(response_success.data);
+                        rcMediaApi.selectSource(added_source);
+                        $scope.onUploadFile({
+                            $file: rcMediaApi.upload.file
+                        });
+                        rcMediaApi.setUploadState(RCMEDIA_UPLOAD_STATES.SELECT_FILES);
+                        rcMediaApi.upload.result = null;
+                        result = rcMediaApi.upload.deferred.resolve(response_success);
+                    }
                     rcMediaApi.upload.loading = false;
-                    rcMediaApi.upload.deferred.resolve(response_success);
+                    return result;
                 }, function(response_error) {
                     $log.debug("error status: " + response_error);
                     rcMediaApi.resetUploadFile();
@@ -831,23 +843,39 @@
             return defer_all;
         };
         this.removeSource = function(source) {
-            var deleted_index = rcMediaApi.sources.map(function(o) {
-                return o[rcMediaApi.sourceId];
-            }).indexOf(source[rcMediaApi.sourceId]);
+            var key = rcMediaApi.sourceId;
+            var value = source[rcMediaApi.sourceId];
+            var deleted_index = rcMediaService.indexOf(rcMediaApi.sources, value, key);
             if (deleted_index !== -1) {
                 rcMediaApi.sources.splice(deleted_index, 1);
             }
-            deleted_index = rcMediaApi.sourcesSelected.map(function(o) {
-                return o[rcMediaApi.sourceId];
-            }).indexOf(source[rcMediaApi.sourceId]);
+            deleted_index = rcMediaService.indexOf(rcMediaApi.sourcesSelected, value, key);
             if (deleted_index !== -1) {
                 rcMediaApi.sourcesSelected.splice(deleted_index, 1);
+            }
+            deleted_index = rcMediaService.indexOf($scope.modelSources, value, key);
+            if (deleted_index !== -1) {
+                $scope.modelSources.splice(deleted_index, 1);
+            }
+            if (angular.isArray($scope.model)) {
+                deleted_index = $scope.model.indexOf(value);
+                if (deleted_index !== -1) {
+                    $scope.model.splice(deleted_index, 1);
+                }
+            } else if (angular.isString($scope.model)) {
+                var values = $scope.model.split(",");
+                deleted_index = values.indexOf(value.toString());
+                if (deleted_index !== -1) {
+                    values.splice(deleted_index, 1);
+                }
+                $scope.model = values.join(",");
             }
             rcMediaApi.bindResize();
         };
         this.addSource = function(source) {
             source.tooltipTitle = rcMediaApi.getSourceTitle(source);
             var new_source = angular.copy(source);
+            new_source[rcMediaApi.sourceUrlKey] += "?" + this.timeStamp();
             rcMediaApi.sources.push(new_source);
             rcMediaApi.bindResize();
             return new_source;
@@ -857,32 +885,22 @@
             if (this.sourcesSelected.length > 0) {
                 var model = [];
                 if (this.returnModelPush === false) {
-                    $scope.modelPreview = [];
+                    $scope.modelSources = [];
                 }
                 angular.forEach(rcMediaApi.sourcesSelected, function(value) {
-                    if (rcMediaApi.returnModelKey) {
-                        model.push(value[rcMediaApi.returnModelKey]);
-                    } else {
-                        model.push(value);
+                    if (rcMediaService.indexOf($scope.modelSources, value[rcMediaApi.sourceId], rcMediaApi.sourceId) === -1) {
+                        $scope.modelSources.push(value);
                     }
-                    $scope.modelPreview.push(value);
+                });
+                model = $scope.modelSources.map(function(a) {
+                    return a[rcMediaApi.returnModelKey];
                 });
                 switch (this.returnModelType) {
                   case "string":
-                    if (this.returnModelPush === true) {
-                        var new_model = $scope.model;
-                        if (new_model.length > 0) {
-                            new_model += ",";
-                        }
-                        model = new_model + model.toString();
-                    }
-                    $scope.model = model.toString();
+                    $scope.model = model.join(",");
                     break;
 
                   case "array":
-                    if (this.returnModelPush === true) {
-                        model = $scope.model.concat(model);
-                    }
                     $scope.model = model;
                     break;
                 }
@@ -948,7 +966,7 @@
             }
             debounce_bind_resize = $timeout(function() {
                 $log.debug("Bind Resize for scroll");
-                $window.dispatchEvent(new Event("resize"));
+                angular.element($window).triggerHandler("resize");
             }, 300);
         };
         this.addBindings = function() {
@@ -966,6 +984,7 @@
             $log.debug("Media Select Init");
             $scope.sourcePreviewHover = false;
             $scope.loading = false;
+            $scope.media = angular.isDefined($scope.media) ? $scope.media : {};
             $scope.theme = angular.isDefined($scope.theme) ? $scope.theme : "";
             $scope.name = angular.isDefined($scope.name) ? $scope.name : "media_sources";
             $scope.id = angular.isDefined($scope.id) ? $scope.id : $scope.name + "_select";
@@ -973,8 +992,8 @@
             $scope.class = angular.isDefined($scope.class) ? $scope.class : "";
             $scope.onetime = angular.isDefined($scope.onetime) ? $scope.onetime : false;
             $scope.single = angular.isDefined($scope.single) ? $scope.single : false;
-            $scope.initSources = angular.isDefined($scope.initSources) ? $scope.initSources : [];
-            $scope.config = angular.isDefined($scope.config) ? $scope.$eval($scope.config) : {};
+            $scope.initSources = angular.isDefined($scope.initSources) ? $scope.initSources() : [];
+            $scope.config = angular.isDefined($scope.config) ? $scope.config() : {};
             var default_media = {
                 sourceId: "id",
                 sourceUrl: "",
@@ -1004,7 +1023,7 @@
                         colorBg: "rgba(200, 200, 200, 0.8)",
                         colorCropBg: "rgba(0, 0, 0, 0.6)"
                     },
-                    loadIcon: "spinner:ripple"
+                    loadIcon: "spinner:clock"
                 },
                 gallery: {
                     order: "date",
@@ -1013,51 +1032,80 @@
                     selectedSources: [],
                     loadIcon: "spinner:ripple"
                 },
-                sources: $scope.initSources,
-                sourcesPreview: angular.isArray($scope.initSources) ? $scope.initSources : []
+                model: [],
+                sources: []
             };
-            $scope.media = angular.merge({}, default_media, $scope.media, $scope.config);
-            $scope.getSources($scope.media.sources);
+            $log.debug($scope.media);
+            $scope.media = rcMediaService.merge({}, default_media, $scope.media, $scope.config);
+            $log.debug($scope.media);
+            if (angular.isDefined($scope.initSources)) {
+                $scope.media.model = $scope.initSources;
+                if (angular.isArray($scope.initSources)) {
+                    $scope.media.sources = $scope.initSources;
+                }
+            }
+            if (angular.isDefined($scope.single)) {
+                $scope.media.gallery.multiple = !$scope.single;
+            }
+            $log.debug($scope.media);
+            $scope.getSourcesFromModel($scope.media.model);
         };
         $scope.removeSource = function($index) {
-            $scope.media.sourcesPreview.splice($index, 1);
-            if (angular.isArray($scope.media.sources)) {
-                $scope.media.sources.splice($index, 1);
-            } else if (angular.isString($scope.media.sources)) {
-                $scope.media.sources = $scope.media.sources.split(",");
-                $scope.media.sources.splice($index, 1);
-                $scope.media.sources = $scope.media.sources.join(",");
+            $scope.media.sources.splice($index, 1);
+            if (angular.isArray($scope.media.model)) {
+                $scope.media.model.splice($index, 1);
+            } else if (angular.isString($scope.media.model)) {
+                $scope.media.model = $scope.media.model.split(",");
+                $scope.media.model.splice($index, 1);
+                $scope.media.model = $scope.media.model.join(",");
             }
         };
-        $scope.getSources = function(sources) {
-            if (angular.isArray(sources)) {
-                sources = sources.join(",");
+        $scope.getModel = function() {
+            var sources = $scope.media.sources.map(function(a) {
+                return a[$scope.media.returnModelKey];
+            });
+            switch ($scope.media.returnModelType) {
+              case "string":
+                $scope.media.model = sources.join(",");
+                break;
+
+              case "array":
+                $scope.media.model = sources;
+                break;
             }
-            if (!angular.isString(sources) && !angular.isNumber(sources) || sources.length === 0) {
+        };
+        $scope.onSortSources = function($item, $partFrom, $partTo, $indexFrom, $indexTo) {
+            $log.debug($scope.media.sources);
+            $scope.getModel();
+        };
+        $scope.getSourcesFromModel = function(model) {
+            var include = "";
+            var sources = [];
+            if (angular.isArray(model)) {
+                include = model.join(",");
+                sources = model;
+            } else if (angular.isString(model)) {
+                include = model;
+                sources = model.split(",");
+            }
+            if (!include.length) {
                 return false;
             }
             var sources_query = angular.copy($scope.media.sourcesQuery);
             sources_query = angular.extend(sources_query, {
-                include: sources
+                include: include
             });
             $scope.loading = true;
             rcMediaService.get(sources_query).then(function(response_success) {
-                $scope.media.sourcesPreview = response_success;
-                sources = [];
-                angular.forEach(response_success, function(value, key) {
-                    if (angular.isDefined(value[$scope.media.returnModelKey])) {
-                        sources.push(value[$scope.media.returnModelKey]);
+                var new_source = [];
+                angular.forEach(sources, function(value, key) {
+                    var index = rcMediaService.indexOf(response_success, value, $scope.media.returnModelKey);
+                    if (index !== -1) {
+                        new_source.push(response_success[index]);
                     }
                 });
-                switch ($scope.media.returnModelType) {
-                  case "string":
-                    $scope.media.sources = sources.toString();
-                    break;
-
-                  case "array":
-                    $scope.media.sources = sources;
-                    break;
-                }
+                $scope.media.sources = new_source;
+                $scope.getModel();
                 $scope.loading = false;
             }, function(response_error) {
                 $scope.loading = false;
@@ -1102,7 +1150,8 @@
                 UPLOAD_INVALID_FILE: "Your file is not valid.",
                 UPLOAD_INVALID_minWidth: "Minimum width",
                 UPLOAD_INVALID_minHeight: "Minimum height",
-                UPLOAD_INVALID_pattern: "File type error"
+                UPLOAD_INVALID_pattern: "File type error",
+                UPLOAD_ERROR_SERVER: "This file is not supported by server"
             },
             "fr-FR": {
                 TITLE_GALLERY: "Galerie",
@@ -1126,7 +1175,8 @@
                 UPLOAD_INVALID_FILE: "Votre fichier n'est pas valide.",
                 UPLOAD_INVALID_minWidth: "Largeur minimum",
                 UPLOAD_INVALID_minHeight: "Hauteur minimum",
-                UPLOAD_INVALID_pattern: "Type de fichier erroné"
+                UPLOAD_INVALID_pattern: "Type de fichier erroné",
+                UPLOAD_ERROR_SERVER: "Ce fichier n'est pas pris en charge par le serveur"
             },
             "nl-NL": {
                 TITLE_GALLERY: "Fotogalerij",
@@ -1150,17 +1200,14 @@
                 UPLOAD_INVALID_FILE: "Uw file is niet geldig.",
                 UPLOAD_INVALID_minWidth: "Minimum breedte",
                 UPLOAD_INVALID_minHeight: "Minimum hoogte",
-                UPLOAD_INVALID_pattern: "Verkeerde file type"
+                UPLOAD_INVALID_pattern: "Verkeerde file type",
+                UPLOAD_ERROR_SERVER: "Dit file wordt niet ondersteund door de server"
             }
         };
         this.interfaceText = angular.copy(this.defaultText);
         this.$get = [ "$http", "$locale", function($http, $locale) {
             var rest = this.rest;
             var localizedText;
-            $http.defaults.useXDomain = true;
-            $http.defaults.headers.common["Access-Control-Allow-Origin"] = "*";
-            $http.defaults.headers.common["If-Modified-Since"] = "0";
-            $http.defaults.headers.common["cache-control"] = "private, max-age=0, no-cache";
             if (this.locale) {
                 localizedText = this.interfaceText[this.locale];
             } else {
@@ -1262,6 +1309,41 @@
                     mediaId: source_id
                 });
                 return rcMediaResource.Media.delete(delete_query).$promise;
+            },
+            indexOf: function(sources, value, key) {
+                if (angular.isUndefined(value) || angular.isUndefined(key) || !angular.isArray(sources)) {
+                    return -1;
+                }
+                return sources.map(function(o) {
+                    return value.constructor(o[key]);
+                }).indexOf(value);
+            },
+            merge: function(dst) {
+                var slice = [].slice;
+                var isArray = Array.isArray;
+                function baseExtend(dst, objs, deep) {
+                    for (var i = 0, ii = objs.length; i < ii; ++i) {
+                        var obj = objs[i];
+                        if (!angular.isObject(obj) && !angular.isFunction(obj)) {
+                            continue;
+                        }
+                        var keys = Object.keys(obj);
+                        for (var j = 0, jj = keys.length; j < jj; j++) {
+                            var key = keys[j];
+                            var src = obj[key];
+                            if (deep && angular.isObject(src)) {
+                                if (!angular.isObject(dst[key])) {
+                                    dst[key] = isArray(src) ? [] : {};
+                                }
+                                baseExtend(dst[key], [ src ], true);
+                            } else {
+                                dst[key] = src;
+                            }
+                        }
+                    }
+                    return dst;
+                }
+                return baseExtend(dst, slice.call(arguments, 1), true);
             }
         };
         return service;
@@ -1269,12 +1351,13 @@
 })(angular);
 
 angular.module("rcMedia").run([ "$templateCache", function($templateCache) {
-    $templateCache.put("rc-media-dialog-zf.tpl.html", '<rc-media class="rc-media"\n     rcm-source-url="{{rcDialogApi.data.sourceUrl}}"\n     rcm-source-url-key="{{rcDialogApi.data.sourceUrlKey}}"\n     rcm-source-id="{{rcDialogApi.data.sourceId}}"\n     rcm-source-title="{{rcDialogApi.data.sourceTitle}}"\n     data-ng-model="rcDialogApi.data.sources"\n     data-ng-model-preview="rcDialogApi.data.sourcesPreview"\n     rcm-return-model-type="{{rcDialogApi.data.returnModelType}}"\n     rcm-return-model-key="{{rcDialogApi.data.returnModelKey}}"\n     rcm-return-model-push="rcDialogApi.data.returnModelPush"\n     rcm-delete-query="{{rcDialogApi.data.deleteQuery}}"\n     rcm-sources-query="{{rcDialogApi.data.sourcesQuery}}"\n     rcm-sources-offset-key="{{rcDialogApi.data.sourcesOffsetKey}}"\n     rcm-sources-limit-key="{{rcDialogApi.data.sourcesLimitKey}}"\n     rcm-sources-search-key="{{rcDialogApi.data.sourcesSearchKey}}"\n>\n<div class="dialog-header">\n    <div class="gallery-view" data-ng-show="!selectedView" >\n        <h3 class="float-left dialog-title"><rcm-translate>TITLE_GALLERY</rcm-translate></h3>\n        <button class="button secondary hollow float-right dialog-close" type="button" data-ng-click="rcDialogApi.closeDialog()" aria-label="Close reveal" >\n            <span aria-hidden="true">&times;</span>\n        </button>\n        <button class="button primary hollow float-right upload" type="button" data-ng-show="!selectedView" data-ng-click="selectedView=\'fileUpload\'" >\n            <svg width="25" height="25" version="1.1" id="rcm_upload_svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"\n                   x="0px" y="0px" viewBox="0 0 23 20.5" style="enable-background:new 0 0 23 20.5;" xml:space="preserve"\n              >\n                <g id="rcm_upload_svg_arrow">\n                  <line id="rcm_upload_svg_line" class="st0" x1="11.5" y1="20.5" x2="11.5" y2="7.5"/>\n                  <polyline id="rcm_upload_svg_point" class="st1" points="8.5,10.5 11.5,7.5 14.5,10.5 \t"/>\n                </g>\n                <path\n                  id="rcm_upload_svg_cloud"\n                  class="st1"\n                  d="M15.5,15.5h3c2.2,0,4-1.8,4-4c0-2.2-1.8-4-4-4c-0.3-3.9-3.5-7-7.5-7c-4,0-7.3,3.2-7.5,7.1c-1.7,0.4-3,2-3,3.9c0,2.2,1.8,4,4,4h3"\n                />\n            </svg>\n            <rcm-translate>BTN_UPLOAD_FILE</rcm-translate>\n        </button>\n    </div>\n\n    <div class="upload-view" data-ng-show="selectedView==\'fileUpload\'">\n        <h3 class="float-left dialog-title" ><rcm-translate>TITLE_UPLOAD</rcm-translate></h3>\n        <button class="button secondary hollow float-right dialog-close" type="button" data-ng-click="rcDialogApi.closeDialog()" aria-label="Close reveal" >\n            <span aria-hidden="true">&times;</span>\n        </button>\n    </div>\n</div>\n<div class="dialog-body">\n\n    \x3c!-- Directive rc-media-upload --\x3e\n    <rcm-upload class="upload-view" data-ng-if="selectedView==\'fileUpload\'"\n         rcm-template-url="rc-media-upload-zf.tpl.html"\n         rcm-multiple="rcDialogApi.data.upload.multiple"\n         rcm-accept="\'{{rcDialogApi.data.upload.accept}}\'"\n         rcm-pattern="\'{{rcDialogApi.data.upload.pattern}}\'"\n         rcm-file-name="{{rcDialogApi.data.upload.fileName}}"\n         rcm-fields="{{rcDialogApi.data.upload.fields}}"\n         rcm-min-width="rcDialogApi.data.upload.minWidth"\n         rcm-min-height="rcDialogApi.data.upload.minHeight"\n         rcm-fix-orientation="rcDialogApi.data.upload.fixOrientation"\n         rcm-crop="rcDialogApi.data.upload.crop"\n         rcm-crop-area="rcDialogApi.data.upload.cropArea"\n         rcm-load-icon="{{rcDialogApi.data.upload.loadIcon}}"\n         rcm-change="selectedView=false"\n    ></rcm-upload>\n\n    <div class="gallery-view" data-ng-show="!selectedView">\n        \x3c!-- Directive rc-media-gallery --\x3e\n        <rcm-gallery\n             rcm-template-url="rc-media-gallery-zf.tpl.html"\n             rcm-order="{{rcDialogApi.data.gallery.order}}"\n             rcm-multiple="rcDialogApi.data.gallery.multiple"\n             rcm-selected-sources="rcDialogApi.data.gallery.selectedSources"\n             rcm-search-value="{{rcDialogApi.data.gallery.searchValue}}"\n             rcm-load-icon="{{rcDialogApi.data.gallery.loadIcon}}"\n        ></rcm-gallery>\n    </div>\n</div>\n<div class="dialog-footer" data-ng-show="selectedView || rcDialogApi.data.gallery.selectedSources.length">\n    <rcm-upload-controls class="upload-view" data-ng-if="selectedView==\'fileUpload\'"\n         rcm-template-url="rc-media-upload-controls-zf.tpl.html"\n         data-ng-model="rcDialogApi.data.uploadFile"\n         rcm-save-click="selectedView=false"\n         rcm-cancel-click="selectedView=false"\n    ></rcm-upload-controls>\n\n    <rcm-gallery-controls class="gallery-view" data-ng-if="!selectedView"\n         rcm-template-url="rc-media-gallery-controls-zf.tpl.html"\n         rcm-save-click="rcDialogApi.confirmDialog()"\n    ></rcm-gallery-controls>\n</div>\n</rc-media>');
+    $templateCache.put("rc-media-dialog-zf.tpl.html", '<rc-media class="rc-media"\n     rcm-source-url="{{rcDialogApi.data.sourceUrl}}"\n     rcm-source-url-key="{{rcDialogApi.data.sourceUrlKey}}"\n     rcm-source-id="{{rcDialogApi.data.sourceId}}"\n     rcm-source-title="{{rcDialogApi.data.sourceTitle}}"\n     data-ng-model="rcDialogApi.data.model"\n     data-ng-model-sources="rcDialogApi.data.sources"\n     rcm-return-model-type="{{rcDialogApi.data.returnModelType}}"\n     rcm-return-model-key="{{rcDialogApi.data.returnModelKey}}"\n     rcm-return-model-push="rcDialogApi.data.returnModelPush"\n     rcm-delete-query="{{rcDialogApi.data.deleteQuery}}"\n     rcm-sources-query="{{rcDialogApi.data.sourcesQuery}}"\n     rcm-sources-offset-key="{{rcDialogApi.data.sourcesOffsetKey}}"\n     rcm-sources-limit-key="{{rcDialogApi.data.sourcesLimitKey}}"\n     rcm-sources-search-key="{{rcDialogApi.data.sourcesSearchKey}}"\n>\n<div class="dialog-header">\n    <div class="gallery-view" data-ng-show="!selectedView" >\n        <h3 class="float-left dialog-title"><rcm-translate>TITLE_GALLERY</rcm-translate></h3>\n        <button class="button secondary hollow float-right dialog-close" type="button" data-ng-click="rcDialogApi.closeDialog()" aria-label="Close reveal" >\n            <span aria-hidden="true">&times;</span>\n        </button>\n        <button class="button primary hollow float-right upload" type="button" data-ng-show="!selectedView" data-ng-click="selectedView=\'fileUpload\'" >\n            <svg width="25" height="25" version="1.1" id="rcm_upload_svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"\n                   x="0px" y="0px" viewBox="0 0 23 20.5" style="enable-background:new 0 0 23 20.5;" xml:space="preserve"\n              >\n                <g id="rcm_upload_svg_arrow">\n                  <line id="rcm_upload_svg_line" class="st0" x1="11.5" y1="20.5" x2="11.5" y2="7.5"/>\n                  <polyline id="rcm_upload_svg_point" class="st1" points="8.5,10.5 11.5,7.5 14.5,10.5 \t"/>\n                </g>\n                <path\n                  id="rcm_upload_svg_cloud"\n                  class="st1"\n                  d="M15.5,15.5h3c2.2,0,4-1.8,4-4c0-2.2-1.8-4-4-4c-0.3-3.9-3.5-7-7.5-7c-4,0-7.3,3.2-7.5,7.1c-1.7,0.4-3,2-3,3.9c0,2.2,1.8,4,4,4h3"\n                />\n            </svg>\n            <rcm-translate>BTN_UPLOAD_FILE</rcm-translate>\n        </button>\n    </div>\n\n    <div class="upload-view" data-ng-show="selectedView==\'fileUpload\'">\n        <h3 class="float-left dialog-title" ><rcm-translate>TITLE_UPLOAD</rcm-translate></h3>\n        <button class="button secondary hollow float-right dialog-close" type="button" data-ng-click="rcDialogApi.closeDialog()" aria-label="Close reveal" >\n            <span aria-hidden="true">&times;</span>\n        </button>\n    </div>\n</div>\n<div class="dialog-body">\n\n    \x3c!-- Directive rc-media-upload --\x3e\n    <rcm-upload class="upload-view" data-ng-if="selectedView==\'fileUpload\'"\n         rcm-template-url="rc-media-upload-zf.tpl.html"\n         rcm-multiple="rcDialogApi.data.upload.multiple"\n         rcm-accept="\'{{rcDialogApi.data.upload.accept}}\'"\n         rcm-pattern="\'{{rcDialogApi.data.upload.pattern}}\'"\n         rcm-file-name="{{rcDialogApi.data.upload.fileName}}"\n         rcm-fields="{{rcDialogApi.data.upload.fields}}"\n         rcm-min-width="rcDialogApi.data.upload.minWidth"\n         rcm-min-height="rcDialogApi.data.upload.minHeight"\n         rcm-fix-orientation="rcDialogApi.data.upload.fixOrientation"\n         rcm-crop="rcDialogApi.data.upload.crop"\n         rcm-crop-area="rcDialogApi.data.upload.cropArea"\n         rcm-load-icon="{{rcDialogApi.data.upload.loadIcon}}"\n         rcm-change="selectedView=false"\n    ></rcm-upload>\n\n    <div class="gallery-view" data-ng-show="!selectedView">\n        \x3c!-- Directive rc-media-gallery --\x3e\n        <rcm-gallery\n             rcm-template-url="rc-media-gallery-zf.tpl.html"\n             rcm-order="{{rcDialogApi.data.gallery.order}}"\n             rcm-multiple="rcDialogApi.data.gallery.multiple"\n             rcm-selected-sources="rcDialogApi.data.gallery.selectedSources"\n             rcm-search-value="{{rcDialogApi.data.gallery.searchValue}}"\n             rcm-load-icon="{{rcDialogApi.data.gallery.loadIcon}}"\n        ></rcm-gallery>\n    </div>\n</div>\n<div class="dialog-footer" data-ng-show="selectedView || rcDialogApi.data.gallery.selectedSources.length">\n    <rcm-upload-controls class="upload-view" data-ng-if="selectedView==\'fileUpload\'"\n         rcm-template-url="rc-media-upload-controls-zf.tpl.html"\n         data-ng-model="rcDialogApi.data.uploadFile"\n         rcm-save-click="selectedView=false"\n         rcm-cancel-click="selectedView=false"\n    ></rcm-upload-controls>\n\n    <rcm-gallery-controls class="gallery-view" data-ng-if="!selectedView"\n         rcm-template-url="rc-media-gallery-controls-zf.tpl.html"\n         rcm-save-click="rcDialogApi.confirmDialog()"\n    ></rcm-gallery-controls>\n</div>\n</rc-media>');
     $templateCache.put("rc-media-gallery-controls-zf.tpl.html", '<button class="button alert hollow float-left delete-file" data-ng-click="deleteSources()" data-ng-disabled="loading"><rcm-translate>BTN_DELETE_FILE</rcm-translate></button>\n<button class="button secondary hollow float-left deselect-all" data-ng-click="deselectSources()" data-ng-disabled="loading"><rcm-translate>BTN_DESELECT_ALL</rcm-translate></button>\n<button class="button primary float-right select-file" data-ng-click="saveSources()" data-ng-disabled="loading"><rcm-translate>BTN_SELECT_FILE</rcm-translate></button>');
-    $templateCache.put("rc-media-gallery-zf.tpl.html", '<div class="rcm-gallery" >\n\n    <alert class="message" data-ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>\n\n    <div data-ng-show="loading" class="loading-overlay">\n        <div device-detector class="is-not-ie">\n            <webicon class="loading-icon" icon="{{loadIcon}}"></webicon>\n        </div>\n        <div device-detector class="is-ie">\n            <div class=\'loading-icon ripple-css\'><div></div><div></div></div>\n        </div>\n    </div>\n\n    <div class="gallery-overlay" scrollbar="{autoUpdate: true}">\n\n        <div class="gallery-sources" data-ng-show="sources.length > 0">\n            <a data-ng-repeat="source in sources | orderBy:order:true"\n               href=""\n               class="thumbnail-block"\n               data-ng-class="{\'selected\': source.activeClass}"\n               data-ng-click="selectSource(source)">\n                <div class="thumbnail"\n                     data-ng-style="{\'background-image\':\'url({{rcMediaApi.sourceUrl + source[rcMediaApi.sourceUrlKey]}})\', \'background-repeat\': \'no-repeat\', \'background-position\': \'center center\', \'background-size\': \'contain\'}"\n                     tooltip-placement="bottom"\n                     tooltip-html-unsafe="{{source.tooltipTitle}}"\n                ></div>\n            </a>\n\n            <button type="button" class="button secondary float-center load-more" data-ng-show="loadMore" data-ng-click="loadMoreSources()" data-ng-disabled="loading">\n                <i class="fa fa-plus"></i>\n                <rcm-translate>BTN_SHOW_MORE</rcm-translate>\n            </button>\n        </div>\n\n        <div class="gallery-empty" data-ng-hide="sources.length || loading">\n            <div class="center-content">\n                <h4><rcm-translate>TITLE_EMPTY_GALLERY</rcm-translate></h4>\n                <p><rcm-translate>SUB_TITLE_EMPTY_GALLERY</rcm-translate></p>\n            </div>\n        </div>\n    </div>\n</div>');
+    $templateCache.put("rc-media-gallery-zf.tpl.html", '<div class="rcm-gallery" >\n\n    <alert class="message" data-ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>\n\n    <div data-ng-show="loading" class="loading-overlay">\n        <div device-detector class="is-not-ie">\n            <webicon class="loading-icon" icon="{{loadIcon}}"></webicon>\n        </div>\n        <div device-detector class="is-ie">\n            <div class=\'loading-icon ripple-css\'><div></div><div></div></div>\n        </div>\n    </div>\n\n    <div class="gallery-overlay" scrollbar="{autoUpdate: true}">\n\n        <div class="gallery-sources" data-ng-show="sources.length > 0">\n            <a data-ng-repeat="source in sources | orderBy:order:true"\n               href=""\n               class="thumbnail-block"\n               data-ng-class="{\'selected\': source.activeClass}"\n               data-ng-click="selectSource(source)">\n                <div class="thumbnail"\n                     data-ng-style="{\'background-image\':\'url(\\\'{{rcMediaApi.sourceUrl + source[rcMediaApi.sourceUrlKey]}}\\\')\', \'background-repeat\': \'no-repeat\', \'background-position\': \'center center\', \'background-size\': \'contain\'}"\n                     tooltip-placement="bottom"\n                     tooltip-html-unsafe="{{source.tooltipTitle}}"\n                ></div>\n            </a>\n\n            <button type="button" class="button secondary float-center load-more" data-ng-show="loadMore" data-ng-click="loadMoreSources()" data-ng-disabled="loading">\n                <i class="fa fa-plus"></i>\n                <rcm-translate>BTN_SHOW_MORE</rcm-translate>\n            </button>\n        </div>\n\n        <div class="gallery-empty" data-ng-hide="sources.length || loading">\n            <div class="center-content">\n                <h4><rcm-translate>TITLE_EMPTY_GALLERY</rcm-translate></h4>\n                <p><rcm-translate>SUB_TITLE_EMPTY_GALLERY</rcm-translate></p>\n            </div>\n        </div>\n    </div>\n</div>');
     $templateCache.put("rc-media-upload-controls-zf.tpl.html", '<div data-ng-show="rcMediaApi.upload.currentState==\'selectFiles\'">\n    <button class="button secondary hollow float-left" data-ng-click="resetUploadFile(true)"><rcm-translate>BTN_BACK_GALLERY</rcm-translate></button>\n</div>\n\n<div data-ng-show="rcMediaApi.upload.currentState==\'cropImage\'">\n    <button class="button primary float-right" data-ng-click="uploadFile()"><rcm-translate>BTN_SAVE</rcm-translate></button>\n    <button class="button hollow secondary float-right" data-ng-click="resetUploadFile()"><rcm-translate>BTN_CANCEL</rcm-translate></button>\n</div>\n\n<div data-ng-show="rcMediaApi.upload.currentState==\'progressFiles\'">\n    <button class="button secondary float-right" data-ng-click="cancelUploadFile()"><rcm-translate>BTN_CANCEL</rcm-translate></button>\n</div>\n');
     $templateCache.put("rc-media-upload-zf.tpl.html", '<div class="rcm-upload">\n\n  <alert class="message" data-ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>\n\n  <div data-ng-show="currentState==\'selectFiles\'" class="rcm-dropzone"\n       ngf-drop\n       data-ng-model="file.source"\n       ngf-change="changeFiles($files, $file, $newFiles, $duplicateFiles, $invalidFiles, $event)"\n       ngf-drag-over-class="dragover"\n       ngf-multiple="multiple"\n       ngf-accept="{{accept}}"\n       ngf-pattern="{{pattern}}"\n       ngf-min-width="minWidth"\n       ngf-min-height="minHeight"\n       ngf-fix-orientation="fixOrientation"\n  >\n\n    <div class="select-file" >\n      <svg width="150" height="150" version="1.1" id="rcm_upload_svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"\n           x="0px" y="0px" viewBox="0 0 23 20.5" style="enable-background:new 0 0 23 20.5;" xml:space="preserve"\n      >\n        <g id="rcm_upload_svg_arrow">\n\t      <line id="rcm_upload_svg_line" class="st0" x1="11.5" y1="20.5" x2="11.5" y2="7.5"/>\n\t      <polyline id="rcm_upload_svg_point" class="st1" points="8.5,10.5 11.5,7.5 14.5,10.5 \t"/>\n        </g>\n        <path\n          id="rcm_upload_svg_cloud"\n          class="st1"\n          d="M15.5,15.5h3c2.2,0,4-1.8,4-4c0-2.2-1.8-4-4-4c-0.3-3.9-3.5-7-7.5-7c-4,0-7.3,3.2-7.5,7.1c-1.7,0.4-3,2-3,3.9c0,2.2,1.8,4,4,4h3"\n        />\n      </svg>\n\n      <h3><rcm-translate>TITLE_DRAG_FILE</rcm-translate></h3>\n      <p class="lead"><rcm-translate>SUB_TITLE_DRAG_FILE</rcm-translate></p>\n\n      <button ngf-select\n              data-ng-model="file.source"\n              ngf-change="changeFiles($files, $file, $newFiles, $duplicateFiles, $invalidFiles, $event)"\n              ngf-multiple="multiple"\n              ngf-accept="{{accept}}"\n              ngf-pattern="{{pattern}}"\n              ngf-min-width="minWidth"\n              ngf-min-height="minHeight"\n              type="button"\n              class="button primary large"\n      >\n        <rcm-translate>BTN_BROWSE_FILE</rcm-translate>\n      </button>\n    </div>\n  </div>\n\n  <div class="crop-area" data-ng-if="currentState==\'cropImage\'">\n    <div>\n      <canvas\n              height="{{cropArea.height}}px"\n              width="{{cropArea.width}}px"\n              min-width="cropArea.minWidth"\n              min-height="cropArea.minHeight"\n              id="canvas"\n              img-cropper\n              img-src="{imageData: (file.source | ngfDataUrl), fileType: file.source.type}"\n              img-dst="file.destDataUrl"\n              crop-width="cropArea.cropWidth"\n              crop-height="cropArea.cropHeight"\n              keep-aspect="cropArea.keepAspect"\n              keep-aspect-ratio="cropArea.keepAspectRatio"\n              enforce-crop-aspect="cropArea.enforceCropAspect"\n              touch-radius="cropArea.touchRadius"\n              color="{{cropArea.color}}"\n              color-drag="{{cropArea.colorDrag}}"\n              color-bg="{{cropArea.colorBg}}"\n              color-crop-bg="{{cropArea.colorCropBg}}"\n      >\n      </canvas>\n    </div>\n  </div>\n\n  <div data-ng-show="currentState==\'progressFiles\'" class="preview-file" >\n\n    <div data-ng-show="loading" class="loading-overlay">\n      <div device-detector class="is-not-ie">\n        <webicon class="loading-icon" icon="{{loadIcon}}"></webicon>\n      </div>\n      <div device-detector class="is-ie">\n        <div class=\'loading-icon ripple-css\'><div></div><div></div></div>\n      </div>\n    </div>\n\n    <img class="float-center" width="300" height="300" data-ng-src="{{file.destDataUrl}}" alt="">\n  </div>\n</div>');
     $templateCache.put("rc-media-search-zf.tpl.html", '<div class="rcm-search input-group">\n  <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>\n  <input type="text" class="form-control" data-ng-model="search" placeholder="Search ...">\n</div>');
-    $templateCache.put("rc-media-select.tpl.html", '<div class="rcm-select">\n    <div class="preview-gallery-overlay">\n        <ul class="rcm-preview-gallery" data-ng-show="media.sourcesPreview.length">\n            <li data-ng-repeat="source in media.sourcesPreview" class="image">\n                <a href="" data-ng-mouseenter="sourcePreviewHover=true" ng-mouseleave="sourcePreviewHover=false" data-ng-click="removeSource($index)" >\n                    <div data-ng-style="{\'background-image\':\'url({{media.sourceUrl + source[media.sourceUrlKey]}})\', \'background-repeat\': \'no-repeat\', \'background-position\': \'center center\', \'background-size\': \'contain\'}">\n                        <i class="rcm-remove" data-ng-show="sourcePreviewHover"></i>\n                    </div>\n                </a>\n            </li>\n        </ul>\n        <input name="{{name}}" id="{{id}}" type="{{type}}" data-ng-model="media.sources" data-ng-update-hidden />\n        <button type="button" class="{{class}}" data-ng-hide="(media.sourcesPreview.length && onetime) || loading" rcd-open="{{theme}}" rcd-data="media" rcd-template-url="rc-media-dialog-zf.tpl.html" rcd-backdrop="true" rcd-click-close="false" rcd-class="dialog-media" data-ng-transclude></button>\n    </div>\n</div>');
+    $templateCache.put("rc-media-select-draggable.tpl.html", '<div class="rcm-select">\n    <div class="preview-gallery-overlay">\n        <ul class="rcm-preview-gallery" sv-root sv-part="media.sources" sv-on-sort="onSortSources($item, $partFrom, $partTo, $indexFrom, $indexTo)" data-ng-show="media.sources.length">\n            <li sv-placeholder class="placeholder-left image"><div><i class="rcm-placeholder"></i></div></li>\n            <li data-ng-repeat="source in media.sources" class="image" sv-element>\n                <a href="" sv-handle data-ng-mouseenter="sourceHover=true" ng-mouseleave="sourceHover=false" data-ng-click="removeSource($index)" >\n                    <div data-ng-style="{\'background-image\':\'url(\\\'{{media.sourceUrl + source[media.sourceUrlKey]}}\\\')\', \'background-repeat\': \'no-repeat\', \'background-position\': \'center center\', \'background-size\': \'contain\'}">\n                        <i class="rcm-remove" data-ng-show="sourceHover"></i>\n                    </div>\n                </a>\n            </li>\n        </ul>\n        <input name="{{name}}" id="{{id}}" type="{{type}}" data-ng-model="media.model" data-ng-update-hidden />\n        <button type="button" class="{{class}}" data-ng-hide="(media.sources.length && onetime) || loading" rcd-open="{{theme}}" rcd-data="media" rcd-template-url="rc-media-dialog-zf.tpl.html" rcd-backdrop="true" rcd-click-close="false" rcd-class="dialog-media" data-ng-transclude></button>\n    </div>\n</div>');
+    $templateCache.put("rc-media-select.tpl.html", '<div class="rcm-select">\n    <div class="preview-gallery-overlay">\n        <ul class="rcm-preview-gallery" data-ng-show="media.sources.length">\n            <li data-ng-repeat="source in media.sources" class="image">\n                <a href="" data-ng-mouseenter="sourceHover=true" ng-mouseleave="sourceHover=false" data-ng-click="removeSource($index)" >\n                    <div data-ng-style="{\'background-image\':\'url(\\\'{{media.sourceUrl + source[media.sourceUrlKey]}}\\\')\', \'background-repeat\': \'no-repeat\', \'background-position\': \'center center\', \'background-size\': \'contain\'}">\n                        <i class="rcm-remove" data-ng-show="sourceHover"></i>\n                    </div>\n                </a>\n            </li>\n        </ul>\n        <input name="{{name}}" id="{{id}}" type="{{type}}" data-ng-model="media.model" data-ng-update-hidden />\n        <button type="button" class="{{class}}" data-ng-hide="(media.sources.length && onetime) || loading" rcd-open="{{theme}}" rcd-data="media" rcd-template-url="rc-media-dialog-zf.tpl.html" rcd-backdrop="true" rcd-click-close="false" rcd-class="dialog-media" data-ng-transclude></button>\n    </div>\n</div>');
 } ]);
 //# sourceMappingURL=rc-media.js.map

@@ -12,8 +12,9 @@
         '$log',
         '$timeout',
         'RCMEDIA_UPLOAD_STATES',
+        'rcMedia',
         'rcMediaService',
-        function ($scope, $q, $window, $injector, $filter, $log, $timeout, RCMEDIA_UPLOAD_STATES, rcMediaService) {
+        function ($scope, $q, $window, $injector, $filter, $log, $timeout, RCMEDIA_UPLOAD_STATES, rcMedia, rcMediaService) {
 
         var rcMediaApi = this;
         var debounce_bind_resize;
@@ -57,7 +58,7 @@
             this.sourceTitle    = angular.isDefined($scope.sourceTitle) ? $scope.sourceTitle : 'title.rendered';
 
             this.returnModelType  = angular.isDefined($scope.returnModelType) ? $scope.returnModelType : 'string';
-            this.returnModelKey   = angular.isDefined($scope.returnModelKey) ? $scope.returnModelKey : null;
+            this.returnModelKey   = angular.isDefined($scope.returnModelKey) ? $scope.returnModelKey : this.sourceId;
             this.returnModelPush   = angular.isDefined($scope.returnModelPush) ? $scope.returnModelPush : false;
 
             this.altKey = angular.isDefined($scope.altKey) ? $scope.altKey : 'alt_text';
@@ -90,6 +91,11 @@
             this.addBindings();
 
             $scope.onMediaReady({$rcMediaApi: this});
+        };
+
+
+        this.timeStamp = function() {
+            return parseInt(new Date().getTime() / 1000);
         };
 
         /**
@@ -344,21 +350,35 @@
                         $log.debug('Upload Success');
                         rcMediaApi.resetUploadFile();
 
-                        //Add source to sources;
-                        var added_source = rcMediaApi.addSource(response_success.data);
+                        var result;
 
-                        //@ addes source
-                        rcMediaApi.selectSource(added_source);
+                        if (angular.isString(response_success.data)) {
+                            rcMediaApi.upload.result = {
+                                message: rcMedia.getLocalizedText('UPLOAD_INVALID_FILE')
+                            };
+
+                            result = rcMediaApi.upload.deferred.reject(response_success);
+                        }
+                        else {
+                            //Add source to sources;
+                            var added_source = rcMediaApi.addSource(response_success.data);
+
+                            //@ added source
+                            rcMediaApi.selectSource(added_source);
 
 
-                        $scope.onUploadFile({$file: rcMediaApi.upload.file});
+                            $scope.onUploadFile({$file: rcMediaApi.upload.file});
 
-                        rcMediaApi.setUploadState(RCMEDIA_UPLOAD_STATES.SELECT_FILES);
+                            rcMediaApi.setUploadState(RCMEDIA_UPLOAD_STATES.SELECT_FILES);
 
-                        rcMediaApi.upload.result = null;
+                            rcMediaApi.upload.result = null;
+
+                            result = rcMediaApi.upload.deferred.resolve(response_success);
+                        }
+
                         rcMediaApi.upload.loading = false;
 
-                        rcMediaApi.upload.deferred.resolve(response_success);
+                        return result;
                     },
                     function (response_error) {
                         $log.debug('error status: ' + response_error);
@@ -547,16 +567,41 @@
          */
         this.removeSource = function ( source ) {
 
+            var key = rcMediaApi.sourceId;
+            var value = source[rcMediaApi.sourceId];
+
             //Remove in source
-            var deleted_index = rcMediaApi.sources.map(function(o) { return o[rcMediaApi.sourceId]; }).indexOf(source[rcMediaApi.sourceId]);
+            var deleted_index = rcMediaService.indexOf(rcMediaApi.sources, value, key);
             if (deleted_index !== -1) {
                 rcMediaApi.sources.splice(deleted_index, 1);
             }
 
             //Remove in sourcesSelected
-            deleted_index = rcMediaApi.sourcesSelected.map(function(o) { return o[rcMediaApi.sourceId]; }).indexOf(source[rcMediaApi.sourceId]);
+            deleted_index = rcMediaService.indexOf(rcMediaApi.sourcesSelected, value, key);
             if (deleted_index !== -1) {
                 rcMediaApi.sourcesSelected.splice(deleted_index, 1);
+            }
+
+            //Remove in modelSources
+            deleted_index = rcMediaService.indexOf($scope.modelSources, value, key);
+            if (deleted_index !== -1) {
+                $scope.modelSources.splice(deleted_index, 1);
+            }
+
+            //Remove in model
+            if (angular.isArray($scope.model)) {
+                deleted_index = $scope.model.indexOf(value);
+                if (deleted_index !== -1) {
+                    $scope.model.splice(deleted_index, 1);
+                }
+            }
+            else if(angular.isString($scope.model)) {
+                var values =  $scope.model.split(',');
+                deleted_index = values.indexOf(value.toString());
+                if (deleted_index !== -1) {
+                    values.splice(deleted_index, 1);
+                }
+                $scope.model = values.join(',');
             }
 
             rcMediaApi.bindResize();
@@ -569,10 +614,13 @@
          * @param source
          */
         this.addSource = function ( source ) {
+
             source.tooltipTitle = rcMediaApi.getSourceTitle(source);
 
             var new_source = angular.copy(source);
 
+
+            new_source[rcMediaApi.sourceUrlKey] += '?' + this.timeStamp();
             rcMediaApi.sources.push(new_source);
 
             rcMediaApi.bindResize();
@@ -591,36 +639,24 @@
                 var model = [];
 
                 if (this.returnModelPush === false) {
-                    $scope.modelPreview = [];
+                    $scope.modelSources = [];
                 }
 
                 angular.forEach(rcMediaApi.sourcesSelected, function (value) {
-                    if (rcMediaApi.returnModelKey) {
-                        model.push(value[rcMediaApi.returnModelKey]);
-                    }
-                    else {
-                        model.push(value);
-                    }
 
-                    $scope.modelPreview.push(value);
+                    //Prevent Duplicate source
+                    if (rcMediaService.indexOf($scope.modelSources, value[rcMediaApi.sourceId], rcMediaApi.sourceId) === -1) {
+                        $scope.modelSources.push(value);
+                    }
                 });
 
+                model = $scope.modelSources.map(function(a) {return a[rcMediaApi.returnModelKey];});
 
                 switch (this.returnModelType) {
                     case 'string':
-                        if (this.returnModelPush === true) {
-                            var new_model = $scope.model;
-                            if (new_model.length > 0) {
-                                new_model += ',';
-                            }
-                            model = new_model + model.toString();
-                        }
-                        $scope.model = model.toString();
+                        $scope.model = model.join(',');
                         break;
                     case 'array':
-                        if (this.returnModelPush === true) {
-                            model = $scope.model.concat(model);
-                        }
                         $scope.model = model;
                         break;
                 }
@@ -715,14 +751,13 @@
 
             debounce_bind_resize = $timeout(function() {
                 $log.debug('Bind Resize for scroll');
-                $window.dispatchEvent(new Event("resize"));
+                angular.element($window).triggerHandler('resize');
             }, 300);
         };
 
         this.addBindings = function () {
             $log.debug('addBindings');
         };
-
 
         //Init
         this.init();

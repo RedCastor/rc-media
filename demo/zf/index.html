@@ -20,6 +20,7 @@
     <script src="../dist/scripts/ngTinyScrollbar.js"></script>
     <script src="../dist/scripts/webicon.js"></script>
     <script src="../dist/scripts/ng-device-detector.js"></script>
+    <script src="../dist/scripts/angular-sortable-view.js"></script>
 
     <script src="../../dist/rc-media.js"></script>
     <script src="../dist/scripts/main.js"></script>
@@ -27,7 +28,7 @@
     <script type="text/javascript">
         'use strict';
 
-        var app = angular.module('app', ['ngFileUpload', 'angular-img-cropper', 'rcMedia', 'rcDialog', 'ngTinyScrollbar', 'mm.foundation', 'ngAnimate', 'angular-json-pretty', 'webicon', 'ng.deviceDetector']);
+        var app = angular.module('app', ['ngFileUpload', 'angular-img-cropper', 'rcMedia', 'rcDialog', 'ngTinyScrollbar', 'mm.foundation', 'ngAnimate', 'angular-json-pretty', 'webicon', 'ng.deviceDetector', 'angular-sortable-view']);
 
         app.config(function($webiconProvider) {
             $webiconProvider
@@ -36,15 +37,15 @@
 
         app.config(['rcMediaProvider', function (rcMediaProvider) {
 
-            //rcMediaProvider.setRest({
-            //    url: 'https://media.redcastor.io/upload/',
-            //    path: 'server.php'
-            //});
-
             rcMediaProvider.setRest({
-                url: 'http://localhost/projects/Staglabel/wp-dev/woodev/wp-json',
-                path: '/wp/v2/media'
+                url: 'https://media.redcastor.io/api/',
+                path: 'media'
             });
+
+            //rcMediaProvider.setRest({
+            //    url: 'http://localhost/projects/Staglabel/wp-dev/woodev/wp-json',
+            //    path: '/wp/v2/media'
+            //});
 
             rcMediaProvider.useLocale('fr-FR');
         }]);
@@ -54,19 +55,27 @@
         }]);
 
         app.controller('mediaController', ['$scope', '$log', function ($scope, $log) {
+
+
             $scope.media = {
                 sourceId: 'id',
-                sourceUrl: '',
-                sourceUrlKey: 'source_url',
-                sourceTitle: 'title.rendered',
+                //sourceUrl: '',
+                sourceUrl: 'https://media.redcastor.io/upload/',
+                //sourceUrlKey: 'source_url',
+                sourceUrlKey: 'meta',
+                //sourceTitle: 'title.rendered',
+                sourceTitle: 'title',
                 returnModelType: 'string',
                 returnModelKey: 'id',
                 returnModelPush: false,
                 sourcesOffsetKey: 'offset',
-                sourcesLimitKey:  'per_page',
+                //sourcesLimitKey:  'per_page',
+                sourcesLimitKey:  'limit',
                 sourcesSearchKey: 'search',
                 sourcesQuery: {
-                    per_page : 10
+                    //per_page : 10
+                    limit: 5,
+                    offset:0
                 },
                 deleteQuery: {
                     force: true
@@ -84,7 +93,7 @@
                         colorBg: 'rgba(200, 200, 200, 0.8)',
                         colorCropBg: 'rgba(0, 0, 0, 0.6)'
                     },
-                    loadIcon: 'spinner:ripple'
+                    loadIcon: 'spinner:clock'
                 },
                 gallery: {
                     order: 'date',
@@ -94,16 +103,44 @@
                     loadIcon: 'spinner:ripple'
                 },
                 uploadFile: null,
-                sources: [],
-                sourcesPreview: []
+                model: '',
+                sources: []
             };
 
             $scope.mediaSelect = {
+                //sourceUrl: '',
+                sourceUrl: 'https://media.redcastor.io/upload/',
+                //sourceUrlKey: 'source_url',
+                sourceUrlKey: 'meta',
+                //sourceTitle: 'title.rendered',
+                sourceTitle: 'title',
+                returnModelPush: true,
                 upload: {
                     fileName: 'My Custom Name',
-                    fields: {
-                        alt_text:'Salut 2 Alt Text'
-                    },
+                    minWidth: 600,
+                    minHeight: 600,
+                    cropArea: {
+                        touchRadius: 10,
+                        keepAspect: false,
+                        keepAspectRatio: true,
+                        color: 'rgba(88, 184, 21, 1)',
+                        colorDrag: 'rgba(88, 184, 21, 1)',
+                        colorBg: '#dddddd',
+                        colorCropBg: 'rgba(0, 0, 0, 0.6)'
+                    }
+                }
+            };
+
+            $scope.mediaSelect2 = {
+                //sourceUrl: '',
+                sourceUrl: 'https://media.redcastor.io/upload/',
+                //sourceUrlKey: 'source_url',
+                sourceUrlKey: 'meta',
+                //sourceTitle: 'title.rendered',
+                sourceTitle: 'title',
+                returnModelPush: true,
+                upload: {
+                    fileName: 'My Custom Name',
                     minWidth: 600,
                     minHeight: 600,
                     cropArea: {
@@ -137,7 +174,7 @@
                 <h3>Angular Directive Media Picker with upload and crop image</h3>
                 <a class="button large hollow default" href="https://github.com/RedCastor/rc-media"><i class="fa fa-github"></i>&nbsp;&nbsp;View on GitHub</a>
                 <a class="button large hollow default" href="https://github.com/RedCastor/rc-media/releases"><i class="fa fa-download"></i>&nbsp;&nbsp;Download</a>
-                <h5 class="version"><small>Currently v1.0.0-alpha</small></h5>
+                <h5 class="version"><small>Currently v1.1.0-alpha</small></h5>
             </div>
         </div>
     </div>
@@ -162,10 +199,10 @@
                         rcd-class="dialog-media"
                 >Open Media Foundation</button>
 
-                <input type="text" data-ng-model="media.sources" >
+                <input type="text" data-ng-model="media.model" >
 
                 <div class="row small-up-2 medium-up-3 large-up-4">
-                    <div class="column column-block" data-ng-repeat="source in media.sourcesPreview">
+                    <div class="column column-block" data-ng-repeat="source in media.sources">
                         <p><img data-ng-src="{{source.source_url}}" alt=""></p>
                     </div>
                 </div>
@@ -179,7 +216,7 @@
                 <hr>
             </header>
             <section class="small-12 medium-6 small-centered medium-centered column">
-                <rcm-select rcm-onetime="true" rcm-single="false" rcm-class="button primary expanded" rcm-theme="foundation" rcm-config="{upload: {minWidth: 300, minHeight: 300}}" rcm-init-sources="'557,334'" >Select Image</rcm-select>
+                <rcm-select rcm-onetime="true" rcm-single="true" rcm-class="button primary expanded" rcm-theme="foundation" rcm-media="mediaSelect" rcm-config="{'upload': {'fields': {'alt_text':'Salu\'t 2 Alt Text'},minWidth: 300, minHeight: 300}}" rcm-init-sources="'2212294583,2707236321,34335665'" >Select Image</rcm-select>
                 <br>
             </section>
         </div>
@@ -189,17 +226,17 @@
                 <hr>
             </header>
             <section class="small-6 medium-6 small-centered medium-centered column">
-                <rcm-select rcm-onetime="false" rcm-single="true" rcm-class="button success expanded" rcm-theme="foundation" rcm-media="mediaSelect" rcm-config="{upload: {minWidth: 300, minHeight: 300}}">Add to Gallery</rcm-select>
+                <rcm-select rcm-onetime="false" rcm-template-url="rc-media-select-draggable.tpl.html" rcm-single="false" rcm-class="button success expanded" rcm-theme="foundation" rcm-config="mediaSelect">Add to Gallery</rcm-select>
                 <br>
             </section>
         </div>
         <div class="row">
             <header class="small-12 column">
-                <h4>Example multiple select</h4>
+                <h4>Example crop disabled</h4>
                 <hr>
             </header>
             <section class="small-6 medium-6 small-centered medium-centered column">
-                <rcm-select rcm-onetime="false" rcm-single="true" rcm-class="button success expanded" rcm-theme="foundation" rcm-media="mediaSelect" rcm-config="{upload: {crop:false}}">Add to Gallery</rcm-select>
+                <rcm-select rcm-onetime="false" rcm-single="false" rcm-class="button success expanded" rcm-theme="foundation" rcm-media="mediaSelect2" rcm-config="{upload: {crop:false}}">Add to Gallery</rcm-select>
                 <br>
             </section>
         </div>

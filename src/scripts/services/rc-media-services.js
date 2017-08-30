@@ -42,7 +42,8 @@
                 UPLOAD_INVALID_FILE : 'Your file is not valid.',
                 UPLOAD_INVALID_minWidth : 'Minimum width',
                 UPLOAD_INVALID_minHeight: 'Minimum height',
-                UPLOAD_INVALID_pattern  : 'File type error'
+                UPLOAD_INVALID_pattern  : 'File type error',
+                UPLOAD_ERROR_SERVER: 'This file is not supported by server'
             },
             'fr-FR': {
                 TITLE_GALLERY       : 'Galerie',
@@ -66,7 +67,8 @@
                 UPLOAD_INVALID_FILE : 'Votre fichier n\'est pas valide.',
                 UPLOAD_INVALID_minWidth : 'Largeur minimum',
                 UPLOAD_INVALID_minHeight: 'Hauteur minimum',
-                UPLOAD_INVALID_pattern  : 'Type de fichier erroné'
+                UPLOAD_INVALID_pattern  : 'Type de fichier erroné',
+                UPLOAD_ERROR_SERVER : 'Ce fichier n\'est pas pris en charge par le serveur'
             },
             'nl-NL': {
                 TITLE_GALLERY       : 'Fotogalerij',
@@ -90,7 +92,8 @@
                 UPLOAD_INVALID_FILE : 'Uw file is niet geldig.',
                 UPLOAD_INVALID_minWidth : 'Minimum breedte',
                 UPLOAD_INVALID_minHeight: 'Minimum hoogte',
-                UPLOAD_INVALID_pattern  : 'Verkeerde file type'
+                UPLOAD_INVALID_pattern  : 'Verkeerde file type',
+                UPLOAD_ERROR_SERVER  : 'Dit file wordt niet ondersteund door de server'
             }
         };
 
@@ -102,15 +105,6 @@
         this.$get = [ '$http', '$locale', function( $http, $locale ) {
             var rest = this.rest;
             var localizedText;
-
-            //Enable Cors
-            $http.defaults.useXDomain = true;
-            $http.defaults.headers.common['Access-Control-Allow-Origin']  = '*';
-
-            // Disable IE ajax request caching
-            $http.defaults.headers.common['If-Modified-Since']  = '0';
-            //Disable caching
-            $http.defaults.headers.common['cache-control']      = 'private, max-age=0, no-cache';
 
             //Translation
             if(this.locale) {
@@ -251,6 +245,57 @@
                 angular.extend(delete_query, { mediaId: source_id } );
 
                 return rcMediaResource.Media.delete( delete_query ).$promise;
+            },
+
+            indexOf: function (sources, value, key) {
+
+                if (angular.isUndefined(value) || angular.isUndefined(key) || !angular.isArray(sources)) {
+                    return -1;
+                }
+
+                return sources.map(function(o) { return (value.constructor) (o[key]); }).indexOf(value);
+            },
+
+            merge: function (dst) {
+
+                var slice = [].slice;
+                var isArray = Array.isArray;
+
+                function baseExtend(dst, objs, deep) {
+
+                    for (var i = 0, ii = objs.length; i < ii; ++i) {
+
+                        var obj = objs[i];
+
+                        if (!angular.isObject(obj) && !angular.isFunction(obj)) {
+                            continue;
+                        }
+
+                        var keys = Object.keys(obj);
+
+                        for (var j = 0, jj = keys.length; j < jj; j++) {
+
+                            var key = keys[j];
+                            var src = obj[key];
+
+                            if (deep && angular.isObject(src)) {
+
+                                if (!angular.isObject(dst[key])) {
+                                    dst[key] = isArray(src) ? [] : {};
+                                }
+
+                                baseExtend(dst[key], [src], true);
+                            } else {
+
+                                dst[key] = src;
+                            }
+                        }
+                    }
+
+                    return dst;
+                }
+
+                return baseExtend(dst, slice.call(arguments, 1), true);
             }
 
         };

@@ -26,6 +26,7 @@ ul.rcm-preview-gallery {
 }
 
 
+.rcm-placeholder,
 .rcm-remove {
   position: relative;
   display: inline-block;
@@ -33,12 +34,9 @@ ul.rcm-preview-gallery {
   height: 100%;
   overflow: hidden;
   background-color: rgba(0, 0, 0, 0.6);
-  &:hover {
-    &::before, &::after {
-      background: red;
-    }
-  }
+}
 
+.rcm-remove {
   &::before, &::after {
     content: '';
     position: absolute;
@@ -50,12 +48,16 @@ ul.rcm-preview-gallery {
     background: red;
   }
 
+  &:hover {
+    &::before, &::after {
+      background: red;
+    }
+  }
+
   &::before {
     transform: rotate(45deg);
   }
   &::after {
     transform: rotate(-45deg);
   }
-
-
 }
