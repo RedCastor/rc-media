@@ -80,17 +80,15 @@
                 scope.order = angular.isDefined(scope.order) ? scope.order : "date";
                 scope.multiple = angular.isDefined(scope.multiple) ? scope.multiple : false;
                 scope.search = angular.isDefined(scope.search) ? scope.search : "";
+                function add_alert(type, msg) {
+                    scope.alerts.push({
+                        type: type,
+                        msg: msg
+                    });
+                }
                 scope.onChangeGalleryLoading = function(newValue, oldValue) {
                     if (newValue === false) {
                         scope.loadMore = rcMediaApi.gallery.loadMore;
-                        if (angular.isObject(rcMediaApi.gallery.result) && angular.isDefined(rcMediaApi.gallery.result.message)) {
-                            scope.alerts.push({
-                                type: "alert",
-                                msg: rcMediaApi.gallery.result.message
-                            });
-                        }
-                    } else {
-                        scope.alerts = [];
                     }
                     scope.loading = newValue;
                 };
@@ -105,6 +103,16 @@
                     if (newValue !== oldValue) {
                         $log.debug("onChangeSourcesSelected");
                         scope.seletedSources = newValue;
+                    }
+                };
+                scope.onChangeGalleryResult = function(newValue, oldValue) {
+                    $log.debug("onChangeGalleryResult");
+                    if (newValue !== oldValue) {
+                        if (angular.isObject(rcMediaApi.gallery.result) && angular.isDefined(rcMediaApi.gallery.result.message)) {
+                            add_alert("alert", rcMediaApi.gallery.result.message);
+                        } else {
+                            scope.alerts = [];
+                        }
                     }
                 };
                 scope.selectSource = function(source, index) {
@@ -130,6 +138,7 @@
                 scope.$watchCollection("rcMediaApi.sources", scope.onChangeSources);
                 scope.$watchCollection("rcMediaApi.sourcesSelected", scope.onChangeSourcesSelected);
                 scope.$watch("rcMediaApi.gallery.loading", scope.onChangeGalleryLoading);
+                scope.$watch("rcMediaApi.gallery.result", scope.onChangeGalleryResult);
             }
         };
     } ]);
@@ -332,8 +341,6 @@
                 };
                 scope.onChangeUploadResult = function(newValue, oldValue) {
                     $log.debug("onChangeUploadResult");
-                    $log.debug(newValue);
-                    $log.debug(oldValue);
                     if (newValue !== oldValue) {
                         if (angular.isObject(rcMediaApi.upload.result) && angular.isDefined(rcMediaApi.upload.result.message)) {
                             add_alert("alert", rcMediaApi.upload.result.message);
@@ -818,6 +825,7 @@
         this.deleteSources = function() {
             $log.debug("deleteSources");
             var all = [];
+            rcMediaApi.gallery.result = null;
             angular.forEach(this.sourcesSelected, function(source, key) {
                 all.push(rcMediaService.delete(source[rcMediaApi.sourceId], rcMediaApi.deleteQuery).then(function(response_success) {
                     rcMediaApi.removeSource(source);
@@ -830,6 +838,8 @@
                         $scope.onDeleteSources({
                             $source: source
                         });
+                    } else {
+                        rcMediaApi.gallery.result = response_error.data;
                     }
                 }));
             });

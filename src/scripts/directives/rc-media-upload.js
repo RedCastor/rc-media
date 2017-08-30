@@ -77,8 +77,6 @@
                 scope.onChangeUploadResult = function (newValue, oldValue) {
 
                     $log.debug('onChangeUploadResult');
-                    $log.debug(newValue);
-                    $log.debug(oldValue);
 
                     if (newValue !== oldValue) {
                         if (angular.isObject(rcMediaApi.upload.result) && angular.isDefined(rcMediaApi.upload.result.message)) {

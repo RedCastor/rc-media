@@ -524,6 +524,7 @@
             $log.debug('deleteSources');
 
             var all = [];
+            rcMediaApi.gallery.result = null;
 
             angular.forEach(this.sourcesSelected, function (source, key) {
 
@@ -538,6 +539,9 @@
                         if (response_error.status === 404) {
                             rcMediaApi.removeSource(source);
                             $scope.onDeleteSources({$source: source} );
+                        }
+                        else {
+                            rcMediaApi.gallery.result = response_error.data;
                         }
                     }
                 ));

@@ -31,18 +31,16 @@
                 scope.multiple = angular.isDefined(scope.multiple) ? scope.multiple : false;
                 scope.search = angular.isDefined(scope.search) ? scope.search : '';
 
+                function add_alert (type, msg) {
+                    scope.alerts.push({type: type, msg: msg});
+                }
+
                 // FUNCTIONS
                 scope.onChangeGalleryLoading = function (newValue, oldValue) {
 
                     if (newValue === false) {
                         scope.loadMore = rcMediaApi.gallery.loadMore;
 
-                        if (angular.isObject(rcMediaApi.gallery.result) && angular.isDefined(rcMediaApi.gallery.result.message)) {
-                            scope.alerts.push({type: 'alert', msg: rcMediaApi.gallery.result.message});
-                        }
-                    }
-                    else {
-                        scope.alerts = [];
                     }
 
                     scope.loading = newValue;
@@ -60,6 +58,20 @@
                     if (newValue !== oldValue) {
                         $log.debug('onChangeSourcesSelected');
                         scope.seletedSources = newValue;
+                    }
+                };
+
+                scope.onChangeGalleryResult = function (newValue, oldValue) {
+
+                    $log.debug('onChangeGalleryResult');
+
+                    if (newValue !== oldValue) {
+                        if (angular.isObject(rcMediaApi.gallery.result) && angular.isDefined(rcMediaApi.gallery.result.message)) {
+                            add_alert('alert', rcMediaApi.gallery.result.message);
+                        }
+                        else {
+                            scope.alerts = [];
+                        }
                     }
                 };
 
@@ -101,6 +113,7 @@
                 scope.$watchCollection('rcMediaApi.sources', scope.onChangeSources);
                 scope.$watchCollection('rcMediaApi.sourcesSelected', scope.onChangeSourcesSelected);
                 scope.$watch('rcMediaApi.gallery.loading', scope.onChangeGalleryLoading);
+                scope.$watch('rcMediaApi.gallery.result',  scope.onChangeGalleryResult);
 
             }
         };
