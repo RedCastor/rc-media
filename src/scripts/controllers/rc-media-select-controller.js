@@ -72,24 +72,19 @@
                     sources: []
                 };
 
-                $log.debug($scope.media);
                 $scope.media = rcMediaService.merge({}, default_media, $scope.media, $scope.config);
-                $log.debug($scope.media);
 
-                if (angular.isDefined($scope.initSources)) {
-                    $scope.media.model = $scope.initSources;
-
-                    if (angular.isArray($scope.initSources)) {
-                        $scope.media.sources = $scope.initSources;
-                    }
+                if (!$scope.media.model.length && $scope.media.returnModelType === 'string') {
+                    $scope.media.model = '';
                 }
 
                 if (angular.isDefined($scope.single)) {
                     $scope.media.gallery.multiple = !$scope.single;
                 }
 
+                $scope.getSourcesFromModel( $scope.initSources );
+
                 $log.debug($scope.media);
-                $scope.getSourcesFromModel( $scope.media.model );
             };
 
 
@@ -131,20 +126,15 @@
             };
 
 
-            $scope.getSourcesFromModel = function ( model ) {
+            $scope.getSourcesFromModel = function ( model_sources ) {
 
-                var include = '';
-                var sources = [];
-
-                if(angular.isArray(model)) {
-                    include = model.join(',');
-                    sources = model;
-                }else if(angular.isString(model) ) {
-                    include = model;
-                    sources = model.split(',');
-                }
+                var include = angular.isArray(model_sources) ? model_sources.join(',') : model_sources.toString();
+                var sources = include.split(',');
 
                 if(!include.length ) {
+                    $scope.media.sources = [];
+
+                    $scope.getModel();
                     return false;
                 }
 
