@@ -1084,6 +1084,9 @@
             $scope.getModel();
         };
         $scope.getSourcesFromModel = function(model_sources) {
+            if (!model_sources) {
+                return;
+            }
             var include = angular.isArray(model_sources) ? model_sources.join(",") : model_sources.toString();
             var sources = include.split(",");
             if (!include.length) {
